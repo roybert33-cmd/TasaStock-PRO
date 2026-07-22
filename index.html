@@ -20,6 +20,11 @@
   };
 })();
 </script><script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0b">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>React Artifact</title>
@@ -48,5 +53,14 @@ Error generating stack: `+o.message+`
 </script>
   <script>(function(){function m(a){var h=a.getAttribute("href");if(!h)return;try{var u=new URL(h,document.baseURI);if((u.protocol==="http:"||u.protocol==="https:")&&u.host!==location.host){a.target="_blank";a.rel="noopener noreferrer";}}catch(e){}}function s(){document.querySelectorAll("a[href]").forEach(m);}if(document.readyState!=="loading"){s();}else{document.addEventListener("DOMContentLoaded",s);}document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(a){m(a);}},true);})();</script>
   
+
+  <script>
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js', {scope: './'}).then(r=>console.log('SW ok')).catch(e=>console.log('SW fail',e));
+    });
+  }
+  </script>
+
 </body>
 </html>
