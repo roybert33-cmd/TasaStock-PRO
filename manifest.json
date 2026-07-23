@@ -1,9 +1,8 @@
 {
   "name": "TasaStock PRO",
   "short_name": "TasaStock",
-  "description": "Inventario offline con tasa BCV - $ a Bs",
-  "start_url": "/TasaStock-PRO/",
-  "scope": "/TasaStock-PRO/",
+  "description": "Control de inventario valorizado offline",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#0a0a0b",
   "theme_color": "#0a0a0b",
