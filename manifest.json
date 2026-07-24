@@ -1,21 +1,22 @@
 {
-  "name": "TasaStock PRO",
+  "name": "TasaStock-PRO",
   "short_name": "TasaStock",
-  "description": "Control de inventario valorizado offline",
-  "start_url": "./",
+  "description": "TasaStock PRO - OFFLINE FIRST 2026",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0a0a0b",
-  "theme_color": "#0a0a0b",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
