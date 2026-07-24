@@ -1,4 +1,4 @@
-const CACHE_NAME = "tasastock-pro-v2";
+const CACHE_NAME = "tasastock-pro-v3-FIXED";
 const ASSETS = [
   "./",
   "./index.html",
@@ -24,14 +24,11 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
-  // Solo cache para GET mismo origen
   if (e.request.method !== 'GET') return;
+  if (e.request.url.includes('chrome-extension')) return;
   e.respondWith(
     caches.match(e.request).then(cached => {
-      return cached || fetch(e.request).then(res => {
-        // opcional: guardar nuevas respuestas
-        return res;
-      }).catch(()=> cached);
+      return cached || fetch(e.request);
     })
   );
 });
