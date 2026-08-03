@@ -1,351 +1,807 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- PLAYABLE_TOUCH_PATCH_V1 -->
+  <script>
+    (function() {
+      if (window.__playableTouchPatchInstalled) return;
+      window.__playableTouchPatchInstalled = true;
+      var origAdd = EventTarget.prototype.addEventListener;
+      var blockedTypes = { touchstart: 1, touchmove: 1, wheel: 1 };
+      EventTarget.prototype.addEventListener = function(type, listener, options) {
+        if (blockedTypes[type]) {
+          if (options === undefined || options === null) {
+            options = { passive: true };
+          } else if (typeof options === 'boolean') {
+            options = { capture: options, passive: true };
+          } else {
+            options = Object.assign({}, options, { passive: true });
+          }
+        }
+        return origAdd.call(this, type, listener, options);
+      };
+    })();
+  </script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TasaStock PRO - Cesta Básica 2026</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>TasaStock PRO - Gestión Total</title>
 
   <!-- PWA -->
+  <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#0a0a0a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/png" href="./icon-192.png">
 
-  <!-- React & Babel -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
     
-    :root {
-      --bg: #070708;
-      --card: #0e0e10;
-      --border: #27272a;
-      --accent: #ffffff;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --text-dim: #71717a;
-    }
-
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { 
-      margin: 0; 
-      background: var(--bg); 
-      color: #fafafa; 
-      font-family: 'Geist', sans-serif;
-      overflow-x: hidden;
-    }
-
+    :root { --bg-dark: #070708; }
+    body { font-family: 'Geist', sans-serif; background-color: var(--bg-dark); color: #f4f4f5; overflow-x: hidden; }
     .mono { font-family: 'Geist Mono', monospace; }
-
-    /* UI MEJORADA */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(7, 7, 8, 0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 64px;
-    }
-
-    .nav-pill {
-      display: flex;
-      background: #111113;
-      padding: 4px;
-      border-radius: 99px;
-      border: 1px solid var(--border);
-    }
-
-    .pill-btn {
-      padding: 6px 20px;
-      border-radius: 99px;
-      font-size: 13px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .pill-btn.active { background: #fff; color: #000; }
-    .pill-btn.inactive { background: transparent; color: var(--text-dim); }
-
-    .main-content {
-      padding: 16px;
-      max-width: 1300px;
-      margin: 0 auto;
-    }
-
-    /* GRID SISTEMA POS */
-    .pos-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-    }
-
-    @media (min-width: 1024px) {
-      .pos-grid { grid-template-columns: 1fr 400px; align-items: start; }
-    }
-
-    /* TARJETAS DE PRODUCTO CAJA */
-    .product-list {
-      display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    @media (min-width: 768px) {
-      .product-list { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
-    }
-
-    .p-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      position: relative;
-      transition: 0.1s;
-    }
-    .p-card:active { transform: scale(0.97); background: #16161a; }
     
-    .badge-prot {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--success);
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: bold;
-    }
+    /* Scrollbar Custom */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
 
-    /* TICKET ESTILO APPLE */
-    .ticket-container {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    @media (min-width: 1024px) {
-      .sticky-ticket { position: sticky; top: 80px; }
-    }
-
-    /* MODALES */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-    }
-    @media (min-width: 640px) { .modal-overlay { align-items: center; padding: 20px; } }
-
-    .modal-box {
-      background: #111113;
-      width: 100%;
-      max-width: 450px;
-      border-radius: 24px 24px 0 0;
-      padding: 24px;
-      border: 1px solid var(--border);
-    }
-    @media (min-width: 640px) { .modal-box { border-radius: 24px; } }
-
-    .input-group { margin-bottom: 16px; }
-    .input-label { display: block; font-size: 11px; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
-    .input-field {
-      background: #000;
-      border: 1px solid var(--border);
-      color: #fff;
-      padding: 12px 16px;
-      border-radius: 12px;
-      width: 100%;
-      font-size: 16px;
-      outline: none;
-    }
-    .input-field:focus { border-color: var(--accent); }
-
-    /* ELIX SYSTEM STYLES (REQUIRED) */
-    #elix-activation-overlay { position: fixed; inset: 0; z-index: 999999; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    /* Efectos de Glassmorphism */
+    .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    
+    /* Animaciones */
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .animate-slide-up { animation: slideUp 0.3s ease-out forwards; }
+    
+    /* Fix para prevenir glitches en Android */
+    * { -webkit-tap-highlight-color: transparent; }
+    input, button { outline: none !important; }
+    
+    .tab-active { background: #fff; color: #000; box-shadow: 0 4px 12px rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+  <!-- REACT APP CORE -->
+  <script type="module">
+    import React, { useState, useEffect, useMemo } from 'https://esm.sh/react@18.2.0';
+    import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
+
+    const DB_KEY = "pos_cesta_basica_2026_v3";
+    const VENTAS_KEY = "pos_ventas_history_v1";
+
+    const INITIAL_PRODS = [
+      {codigo:"0001",nombre:"Arroz Mary 1kg",stock:200,costo:1.2,precio:1.6,iva:0,protegido:true,categoria:"exento"},
+      {codigo:"0002",nombre:"Harina PAN 1kg",stock:100,costo:1.5,precio:1.9,iva:0,protegido:true,categoria:"exento"},
+      {codigo:"0101",nombre:"Refresco Coca-Cola 2L",stock:50,costo:1.2,precio:1.8,iva:16,protegido:false,categoria:"gravado"}
+    ];
 
     function App() {
-      // 1. ESTADO DE DATOS (Mismo Key que original)
+      // ESTADOS PRINCIPALES
       const [productos, setProductos] = useState(() => {
-        const saved = localStorage.getItem("pos_cesta_basica_2026_v3");
-        return saved ? JSON.parse(saved) : []; 
+        const saved = localStorage.getItem(DB_KEY);
+        return saved ? JSON.parse(saved) : INITIAL_PRODS;
+      });
+      
+      const [ventas, setVentas] = useState(() => {
+        const saved = localStorage.getItem(VENTAS_KEY);
+        return saved ? JSON.parse(saved) : [];
       });
 
-      const [tab, setTab] = useState('caja');
-      const [carrito, setCarrito] = useState([]);
-      const [search, setSearch] = useState('');
+      const [nombreTienda, setNombreTienda] = useState(localStorage.getItem("pos_tienda_name") || "MI NEGOCIO");
+      const [activeTab, setActiveTab] = useState("caja");
       const [tasa, setTasa] = useState(68.5);
+      const [tasaInput, setTasaInput] = useState("68.5");
       
-      // Estado para Nuevo/Editar Producto
-      const [isModalOpen, setIsModalOpen] = useState(false);
-      const [editingProd, setEditingProd] = useState(null);
-      const [formData, setFormData] = useState({ codigo: '', nombre: '', stock: 0, costo: 0, precio: 0, iva: 0 });
+      // ESTADOS DE CAJA
+      const [busqueda, setBusqueda] = useState("");
+      const [carrito, setCarrito] = useState([]);
+      const [pagaCon, setPagaCon] = useState("");
+      const [showTicketModal, setShowTicketModal] = useState(false);
+      const [lastVenta, setLastVenta] = useState(null);
 
-      // Guardado automático
-      useEffect(() => {
-        localStorage.setItem("pos_cesta_basica_2026_v3", JSON.stringify(productos));
-      }, [productos]);
+      // ESTADOS DE INVENTARIO
+      const [editModal, setEditModal] = useState(false);
+      const [currentProd, setCurrentProd] = useState(null);
+      const [filtroInv, setFiltroInv] = useState("todos"); // todos, bajo, agotado, exento
+      const [bulkModal, setBulkModal] = useState(false);
 
-      // Formateo de moneda
-      const f = (n) => Number(n).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      // PERSISTENCIA
+      useEffect(() => localStorage.setItem(DB_KEY, JSON.stringify(productos)), [productos]);
+      useEffect(() => localStorage.setItem(VENTAS_KEY, JSON.stringify(ventas)), [ventas]);
+      useEffect(() => localStorage.setItem("pos_tienda_name", nombreTienda), [nombreTienda]);
 
-      // Filtrado
-      const filtered = useMemo(() => {
-        return productos.filter(p => 
-          p.nombre.toLowerCase().includes(search.toLowerCase()) || p.codigo.includes(search)
+      // LÓGICA DE BÚSQUEDA Y FILTROS
+      const prodsFiltrados = useMemo(() => {
+        let res = productos.filter(p => 
+          p.nombre.toLowerCase().includes(busqueda.toLowerCase()) || 
+          p.codigo.includes(busqueda)
         );
-      }, [productos, search]);
+        if(activeTab === 'inventario') {
+          if(filtroInv === 'bajo') res = res.filter(p => p.stock > 0 && p.stock < 10);
+          if(filtroInv === 'agotado') res = res.filter(p => p.stock <= 0);
+          if(filtroInv === 'exento') res = res.filter(p => p.iva === 0);
+        }
+        return res.sort((a,b) => (a.protegido === b.protegido) ? 0 : a.protegido ? -1 : 1);
+      }, [productos, busqueda, filtroInv, activeTab]);
 
-      const totalUSD = carrito.reduce((acc, i) => acc + (i.precio * i.qty), 0);
+      // LÓGICA DEL CARRITO
+      const cartItems = useMemo(() => {
+        return carrito.map(item => ({
+          ...item,
+          prod: productos.find(p => p.codigo === item.codigo)
+        })).filter(i => i.prod);
+      }, [carrito, productos]);
+
+      const totales = useMemo(() => {
+        let base = 0, iva = 0, exento = 0;
+        cartItems.forEach(item => {
+          const sub = item.prod.precio * item.cantidad;
+          if(item.prod.iva === 0) exento += sub;
+          else {
+            const b = sub / (1 + (item.prod.iva / 100));
+            base += b;
+            iva += (sub - b);
+          }
+        });
+        const totalUSD = base + iva + exento;
+        return { base, iva, exento, totalUSD, totalBs: totalUSD * tasa };
+      }, [cartItems, tasa]);
+
+      const vuelto = pagaCon ? (parseFloat(pagaCon) - totales.totalUSD) : 0;
 
       // ACCIONES
-      const handleAddToCart = (p) => {
-        if(p.stock <= 0) return;
-        const exist = carrito.find(c => c.codigo === p.codigo);
-        if(exist) {
-          if(exist.qty < p.stock) setCarrito(carrito.map(c => c.codigo === p.codigo ? {...c, qty: c.qty+1} : c));
+      const addToCart = (code) => {
+        const p = productos.find(x => x.codigo === code);
+        if(!p || p.stock <= 0) return;
+        const exists = carrito.find(x => x.codigo === code);
+        if(exists) {
+          if(exists.cantidad >= p.stock) return;
+          setCarrito(carrito.map(x => x.codigo === code ? {...x, cantidad: x.cantidad + 1} : x));
         } else {
-          setCarrito([...carrito, {...p, qty: 1}]);
+          setCarrito([...carrito, {codigo: code, cantidad: 1}]);
         }
       };
 
-      const updateQty = (cod, delta) => {
+      const updateQty = (code, delta) => {
         setCarrito(prev => prev.map(item => {
-          if(item.codigo === cod) {
-            const newQty = item.qty + delta;
-            return (newQty > 0 && newQty <= item.stock) ? {...item, qty: newQty} : item;
-          }
-          return item;
-        }).filter(i => i.qty > 0));
+          if(item.codigo !== code) return item;
+          const p = productos.find(x => x.codigo === code);
+          const newQty = item.cantidad + delta;
+          return (newQty > 0 && newQty <= p.stock) ? {...item, cantidad: newQty} : item;
+        }));
       };
 
-      const openNewProduct = () => {
-        setEditingProd(null);
-        setFormData({ codigo: '', nombre: '', stock: '', costo: '', precio: '', iva: 0 });
-        setIsModalOpen(true);
-      };
-
-      const openEditProduct = (p) => {
-        setEditingProd(p);
-        setFormData({...p});
-        setIsModalOpen(true);
-      };
-
-      const saveProduct = () => {
-        if(!formData.codigo || !formData.nombre) return alert("Código y Nombre requeridos");
-        
-        if(editingProd) {
-          // Editar existente
-          setProductos(productos.map(p => p.codigo === editingProd.codigo ? {...formData, stock: Number(formData.stock), precio: Number(formData.precio)} : p));
-        } else {
-          // Nuevo: Validar que el código no exista
-          if(productos.some(p => p.codigo === formData.codigo)) return alert("El código ya existe");
-          setProductos([...productos, {...formData, stock: Number(formData.stock), precio: Number(formData.precio), protegido: false}]);
-        }
-        setIsModalOpen(false);
-      };
-
-      const procesarVenta = () => {
+      const finalizarVenta = () => {
         if(carrito.length === 0) return;
-        const nuevosProds = productos.map(p => {
-          const enCart = carrito.find(c => c.codigo === p.codigo);
-          return enCart ? { ...p, stock: p.stock - enCart.qty } : p;
-        });
-        setProductos(nuevosProds);
+        const nuevaVenta = {
+          id: Date.now(),
+          fecha: new Date().toLocaleString(),
+          items: cartItems.map(i => ({nombre: i.prod.nombre, cant: i.cantidad, precio: i.prod.precio})),
+          totalUSD: totales.totalUSD,
+          totalBs: totales.totalBs,
+          tasa: tasa
+        };
+
+        // Descontar Stock
+        setProductos(prev => prev.map(p => {
+          const inCart = carrito.find(c => c.codigo === p.codigo);
+          return inCart ? {...p, stock: p.stock - inCart.cantidad} : p;
+        }));
+
+        setVentas([nuevaVenta, ...ventas]);
+        setLastVenta(nuevaVenta);
         setCarrito([]);
-        alert("Cobro exitoso y stock actualizado");
+        setPagaCon("");
+        setShowTicketModal(true);
+        try { playBeep(); } catch(e){}
       };
 
-      return (
-        <div style={{minHeight:'100vh', display:'flex', flexDirection:'column'}}>
-          <header>
-            <div id="elix-logo-trigger" style={{display:'flex', alignItems:'center', gap:'12px'}}>
-              <div style={{background:'#fff', color:'#000', width:'32px', height:'32px', borderRadius:'10px', display:'grid', placeItems:'center', fontWeight:'800', fontSize:'11px'}}>PRO</div>
-              <div>
-                <div style={{fontSize:'13px', fontWeight:'700', letterSpacing:'1px'}}>TasaStock</div>
-                <div style={{fontSize:'9px', color: 'var(--text-dim)'}}>SISTEMA POS 2026</div>
-              </div>
-            </div>
-            
-            <div className="nav-pill">
-              <button onClick={()=>setTab('caja')} className={`pill-btn ${tab==='caja'?'active':'inactive'}`}>Caja</button>
-              <button onClick={()=>setTab('inv')} className={`pill-btn ${tab==='inv'?'active':'inactive'}`}>Stock</button>
-            </div>
-          </header>
+      const playBeep = () => {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.5);
+      };
 
-          <main className="main-content">
-            {tab === 'caja' ? (
-              <div className="pos-grid">
-                <div>
-                  <input className="input-field" style={{marginBottom:'16px'}} placeholder="Buscar por nombre o código..." value={search} onChange={e=>setSearch(e.target.value)} />
+      const shareWhatsApp = (venta) => {
+        const texto = `*${nombreTienda}*\n📌 Recibo: #${venta.id}\n📅 ${venta.fecha}\n------------------\n` + 
+          venta.items.map(i => `${i.cant}x ${i.nombre} - $${(i.precio*i.cant).toFixed(2)}`).join('\n') + 
+          `\n------------------\n*TOTAL: $${venta.totalUSD.toFixed(2)}*\n(Bs ${venta.totalBs.toLocaleString('es-VE')})\nTasa: ${venta.tasa}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+      };
+
+      const handleBackup = () => {
+        const data = { productos, ventas, nombreTienda, tasa };
+        const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `TasaStock_Backup_${new Date().toLocaleDateString()}.json`;
+        a.click();
+      };
+
+      const handleImport = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if(data.productos) setProductos(data.productos);
+            if(data.ventas) setVentas(data.ventas);
+            if(data.nombreTienda) setNombreTienda(data.nombreTienda);
+            alert("Respaldo cargado con éxito");
+          } catch(err) { alert("Archivo inválido"); }
+        };
+        reader.readAsText(file);
+      };
+
+      const bulkPriceIncrease = (pct) => {
+        if(!confirm(`¿Aumentar precios un ${pct}% a productos gravados?`)) return;
+        setProductos(prev => prev.map(p => {
+          if(p.iva > 0 && !p.protegido) {
+            return {...p, precio: parseFloat((p.precio * (1 + pct/100)).toFixed(2))};
+          }
+          return p;
+        }));
+        setBulkModal(false);
+      };
+
+      const stats = useMemo(() => {
+        const hoy = new Date().toLocaleDateString();
+        const vHoy = ventas.filter(v => new Date(v.id).toLocaleDateString() === hoy);
+        return {
+          ventasHoyUSD: vHoy.reduce((acc, v) => acc + v.totalUSD, 0),
+          ventasHoyBs: vHoy.reduce((acc, v) => acc + v.totalBs, 0),
+          cantVentas: vHoy.length
+        };
+      }, [ventas]);
+
+      // RENDERING HELPERS
+      const formatNum = (n) => n.toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+      return React.createElement("div", {className: "min-h-screen pb-20 md:pb-0"}, 
+        // HEADER
+        React.createElement("header", {className: "sticky top-0 z-30 glass bg-black/60 border-b border-zinc-800 px-4 h-16 flex items-center justify-between"},
+          React.createElement("div", {className: "flex items-center gap-3"},
+            React.createElement("div", {className: "w-9 h-9 bg-white text-black rounded-xl grid place-items-center font-black text-xs"}, "PRO"),
+            React.createElement("div", null, 
+              React.createElement("input", {
+                value: nombreTienda, 
+                onChange: (e) => setNombreTienda(e.target.value.toUpperCase()),
+                className: "bg-transparent font-bold text-sm tracking-tight w-32 focus:border-b border-white"
+              }),
+              React.createElement("div", {className: "text-[10px] text-zinc-500 uppercase tracking-widest"}, "POS SYSTEM 2026")
+            )
+          ),
+          React.createElement("div", {className: "flex bg-zinc-900 p-1 rounded-full border border-zinc-800"},
+            ["caja", "inventario", "reportes"].map(t => 
+              React.createElement("button", {
+                key: t,
+                onClick: () => setActiveTab(t),
+                className: `px-4 py-1.5 rounded-full text-xs font-semibold capitalize transition-all ${activeTab === t ? 'tab-active' : 'text-zinc-500'}`
+              }, t)
+            )
+          )
+        ),
+
+        // MAIN CONTENT
+        React.createElement("main", {className: "max-w-7xl mx-auto p-4 animate-slide-up"},
+          
+          // TAB: CAJA
+          activeTab === "caja" && React.createElement("div", {className: "grid lg:grid-cols-12 gap-6"},
+            // Lado Izquierdo: Buscador y Lista
+            React.createElement("div", {className: "lg:col-span-8 space-y-4"},
+              // Tasa de cambio bar
+              React.createElement("div", {className: "bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4"},
+                React.createElement("div", {className: "flex items-center gap-3"},
+                  React.createElement("div", {className: "w-8 h-8 bg-emerald-500/10 text-emerald-500 rounded-full grid place-items-center"}, "$"),
+                  React.createElement("span", {className: "text-xs text-zinc-400 font-medium uppercase"}, "Tasa del día (BCV)")
+                ),
+                React.createElement("div", {className: "flex items-center gap-2 bg-black px-3 py-1.5 rounded-xl border border-zinc-800"},
+                  React.createElement("span", {className: "mono text-xs text-zinc-500"}, "1$ = Bs"),
+                  React.createElement("input", {
+                    type: "text", 
+                    value: tasaInput,
+                    onChange: (e) => {
+                      setTasaInput(e.target.value);
+                      const val = parseFloat(e.target.value.replace(',','.'));
+                      if(!isNaN(val)) setTasa(val);
+                    },
+                    className: "bg-transparent mono text-sm font-bold w-16 outline-none text-center"
+                  })
+                )
+              ),
+              
+              // Buscador
+              React.createElement("div", {className: "relative"},
+                React.createElement("span", {className: "absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-lg"}, "🔍"),
+                React.createElement("input", {
+                  placeholder: "Escribe nombre o código...",
+                  value: busqueda,
+                  onChange: (e) => setBusqueda(e.target.value),
+                  className: "w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 pl-12 pr-4 text-sm focus:border-zinc-500 transition-all shadow-xl"
+                })
+              ),
+
+              // Grid de Productos
+              React.createElement("div", {className: "grid grid-cols-1 sm:grid-cols-2 gap-3"},
+                prodsFiltrados.length > 0 ? prodsFiltrados.map(p => 
+                  React.createElement("div", {
+                    key: p.codigo,
+                    onClick: () => addToCart(p.codigo),
+                    className: `p-4 rounded-2xl border transition-all cursor-pointer active:scale-95 group flex flex-col justify-between h-36 ${p.stock <= 0 ? 'bg-zinc-900/50 border-zinc-800 opacity-40 grayscale' : 'bg-zinc-900 border-zinc-800 hover:border-zinc-600 shadow-lg'}`
+                  },
+                    React.createElement("div", {className: "flex justify-between items-start"},
+                      React.createElement("div", {className: "flex-1 min-w-0"},
+                        React.createElement("div", {className: "flex items-center gap-2 mb-1"},
+                           React.createElement("span", {className: "mono text-[10px] text-zinc-500 bg-black px-1.5 rounded"}, p.codigo),
+                           p.iva === 0 && React.createElement("span", {className: "text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 rounded uppercase font-bold"}, "Exento")
+                        ),
+                        React.createElement("h3", {className: "font-semibold text-sm truncate group-hover:text-white"}, p.nombre)
+                      ),
+                      React.createElement("div", {className: `text-[10px] px-2 py-0.5 rounded-full mono font-bold ${p.stock < 10 ? 'bg-red-500/20 text-red-400' : 'bg-zinc-800 text-zinc-400'}`}, p.stock, " un")
+                    ),
+                    React.createElement("div", {className: "flex items-end justify-between"},
+                      React.createElement("div", null,
+                        React.createElement("div", {className: "mono text-lg font-bold text-white"}, "$", formatNum(p.precio)),
+                        React.createElement("div", {className: "mono text-[10px] text-zinc-500"}, "Bs ", formatNum(p.precio * tasa))
+                      ),
+                      React.createElement("div", {className: "w-8 h-8 rounded-full bg-white text-black grid place-items-center shadow-lg group-hover:rotate-90 transition-transform"}, "+")
+                    )
+                  )
+                ) : React.createElement("div", {className: "col-span-full py-20 text-center text-zinc-500"}, "No se encontraron productos")
+              )
+            ),
+
+            // Lado Derecho: Carrito (Ticket)
+            React.createElement("div", {className: "lg:col-span-4"},
+              React.createElement("div", {className: "bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden sticky top-20 shadow-2xl flex flex-col max-h-[calc(100vh-120px)]"},
+                React.createElement("div", {className: "p-5 border-b border-zinc-800 flex justify-between items-center"},
+                  React.createElement("h2", {className: "font-bold text-sm tracking-widest uppercase"}, "Ticket de Venta"),
+                  React.createElement("button", {onClick: () => setCarrito([]), className: "text-[10px] text-red-400 hover:underline"}, "Vaciar")
+                ),
+                
+                // Lista de Carrito
+                React.createElement("div", {className: "flex-1 overflow-y-auto p-4 space-y-3"},
+                  cartItems.length > 0 ? cartItems.map(item => 
+                    React.createElement("div", {key: item.codigo, className: "flex gap-3 bg-black/40 p-3 rounded-xl border border-zinc-800 animate-slide-up"},
+                      React.createElement("div", {className: "flex-1"},
+                        React.createElement("div", {className: "text-xs font-medium line-clamp-1 mb-1"}, item.prod.nombre),
+                        React.createElement("div", {className: "mono text-[10px] text-zinc-500"}, "$", formatNum(item.prod.precio), " x ", item.cantidad)
+                      ),
+                      React.createElement("div", {className: "flex items-center gap-2"},
+                        React.createElement("button", {onClick: () => updateQty(item.codigo, -1), className: "w-6 h-6 rounded-lg bg-zinc-800 grid place-items-center text-xs hover:bg-zinc-700"}, "-"),
+                        React.createElement("span", {className: "mono text-sm w-4 text-center"}, item.cantidad),
+                        React.createElement("button", {onClick: () => updateQty(item.codigo, 1), className: "w-6 h-6 rounded-lg bg-zinc-800 grid place-items-center text-xs hover:bg-zinc-700"}, "+")
+                      )
+                    )
+                  ) : React.createElement("div", {className: "text-center py-10 opacity-30"}, "🛒 Carrito vacío")
+                ),
+
+                // Footer Ticket: Calculadora y Totales
+                React.createElement("div", {className: "p-5 bg-black border-t border-zinc-800 space-y-4"},
+                  // Calculadora de Vuelto
+                  React.createElement("div", {className: "grid grid-cols-2 gap-2"},
+                    React.createElement("div", null,
+                      React.createElement("label", {className: "text-[9px] text-zinc-500 block mb-1 uppercase tracking-tighter font-bold"}, "Paga con ($)"),
+                      React.createElement("input", {
+                        type: "number",
+                        value: pagaCon,
+                        onChange: (e) => setPagaCon(e.target.value),
+                        className: "w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 mono text-sm",
+                        placeholder: "0.00"
+                      })
+                    ),
+                    React.createElement("div", {className: "text-right"},
+                      React.createElement("label", {className: "text-[9px] text-zinc-500 block mb-1 uppercase tracking-tighter font-bold"}, "Vuelto"),
+                      React.createElement("div", {className: `mono text-sm font-bold pt-2 ${vuelto >= 0 ? 'text-emerald-400' : 'text-red-400'}`}, 
+                        vuelto !== 0 ? `$${formatNum(vuelto)}` : "---"
+                      )
+                    )
+                  ),
                   
-                  <div className="product-list">
-                    {filtered.length === 0 && <div style={{gridColumn:'1/-1', textAlign:'center', padding:'40px', color:'var(--text-dim)'}}>No hay productos registrados</div>}
-                    {filtered.map(p => (
-                      <div key={p.codigo} className="p-card" onClick={() => handleAddToCart(p)}>
-                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                          <span className="mono" style={{fontSize:'10px', color:'var(--text-dim)'}}>{p.codigo}</span>
-                          {p.protegido && <span className="badge-prot">PROT</span>}
-                        </div>
-                        <div style={{fontSize:'14px', fontWeight:'600', height:'38px', overflow:'hidden'}}>{p.nombre}</div>
-                        <div style={{marginTop:'auto'}}>
-                          <div className="mono" style={{fontSize:'18px', fontWeight:'700'}}>${f(p.precio)}</div>
-                          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:'4px'}}>
-                            <span className="mono" style={{fontSize:'10px', color:'var(--text-dim)'}}>Bs {f(p.precio * tasa)}</span>
-                            <span className="mono" style={{fontSize:'10px', color: p.stock < 5 ? 'var(--danger)' : 'var(--success)'}}>{p.stock} pz</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  // Resumen
+                  React.createElement("div", {className: "space-y-1.5"},
+                    React.createElement("div", {className: "flex justify-between text-xs text-zinc-400"},
+                      React.createElement("span", null, "Subtotal gravado"), React.createElement("span", {className: "mono"}, "$", formatNum(totales.base))
+                    ),
+                    totales.iva > 0 && React.createElement("div", {className: "flex justify-between text-xs text-zinc-400 font-medium"},
+                      React.createElement("span", null, "IVA (16%)"), React.createElement("span", {className: "mono"}, "$", formatNum(totales.iva))
+                    ),
+                    totales.exento > 0 && React.createElement("div", {className: "flex justify-between text-xs text-emerald-500/80 font-medium"},
+                      React.createElement("span", null, "Exento (Cesta)"), React.createElement("span", {className: "mono text-emerald-400"}, "$", formatNum(totales.exento))
+                    ),
+                    React.createElement("div", {className: "flex justify-between items-end pt-2"},
+                      React.createElement("span", {className: "text-sm font-bold"}, "TOTAL"),
+                      React.createElement("div", {className: "text-right"},
+                        React.createElement("div", {className: "mono text-2xl font-black text-white leading-none"}, "$", formatNum(totales.totalUSD)),
+                        React.createElement("div", {className: "mono text-xs text-zinc-400 mt-1"}, "Bs ", formatNum(totales.totalBs))
+                      )
+                    )
+                  ),
+                  
+                  React.createElement("button", {
+                    disabled: carrito.length === 0,
+                    onClick: finalizarVenta,
+                    className: "w-full bg-white text-black py-4 rounded-2xl font-bold tracking-widest text-sm hover:bg-zinc-200 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  }, "COBRAR AHORA")
+                )
+              )
+            )
+          ),
 
-                <div className="sticky-ticket">
-                  <div className="ticket-container">
-                    <div style={{padding:'16px', borderBottom:'1px solid var(--border)', fontWeight:'700', display:'flex', justifyContent:'space-between'}}>
-                      <span>Resumen</span>
-                      <span className="mono" style={{color: 'var(--text-dim)'}}>{carrito.length} items</span>
-                    </div>
-                    <div style={{padding:'16px', maxHeight:'350px', overflowY:'auto'}}>
-                      {carrito.length === 0 ? <div style={{textAlign:'center', color: 'var(--text-dim)', padding:'30px'}}>Carrito vacío</div> : 
-                        carrito.map(item => (
-                          <div key={item.codigo} style={{display:'flex', justifyContent:'space-between', marginBottom:'16px'}}>
-                            <div style={{flex:1}}>
-                              <div style={{fontSize:'13px', fontWeight:'600'}}>{item.nombre}</div>
-                              <div className="mono" style={{fontSize:'11px', color:'var(--text-dim)'}}>${f(item.precio)} x {item.qty}</div>
-                            </div>
-                            <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
-                              <button onClick={(e)=>{e.stopPropagation(); updateQty(item.codigo, -1)}} style={{width:'32px', height:'32px', borderRadius:'50%', border:'1px solid var(--border)', background:'#16161a', color:'#fff'}}>-</button>
-                              <button onClick={(e)=>{e.stopPropagation(); updateQty(item.codigo, 1)}} style={{width:'32px', height:'32px', borderRadius:'50%', border:'1px solid var(--border)', background:'#16161a', color:'#fff'}}>+</button>
-                            </div>
-                          </div>
-                        ))
-                      }
-                    </div>
-                    <div style={{padding:'20px', background:'#111113', borderTop:'1px solid var(--border)'}}>
-                       <div style={{display:'flex', justifyContent:'space-between', marginBottom:'8px'}}>
-                          <span style={{color:'var(--text-dim)', fontSize:'14px'}}>Total USD</span>
-                          <span className="mono" style={{fontSize:'24px', fontWeight:'7
+          // TAB: INVENTARIO
+          activeTab === "inventario" && React.createElement("div", {className: "space-y-6"},
+            // Dashboard Inventario
+            React.createElement("div", {className: "grid grid-cols-2 md:grid-cols-4 gap-3"},
+              React.createElement("div", {className: "bg-zinc-900 p-4 rounded-2xl border border-zinc-800"},
+                React.createElement("div", {className: "text-[10px] text-zinc-500 font-bold uppercase"}, "Costo Total"),
+                React.createElement("div", {className: "mono text-xl font-bold"}, "$", formatNum(productos.reduce((acc, p) => acc + (p.costo*p.stock), 0)))
+              ),
+              React.createElement("div", {className: "bg-zinc-900 p-4 rounded-2xl border border-zinc-800"},
+                React.createElement("div", {className: "text-[10px] text-zinc-500 font-bold uppercase"}, "Valor Venta"),
+                React.createElement("div", {className: "mono text-xl font-bold text-white"}, "$", formatNum(productos.reduce((acc, p) => acc + (p.precio*p.stock), 0)))
+              ),
+              React.createElement("div", {className: "bg-zinc-900 p-4 rounded-2xl border border-zinc-800"},
+                React.createElement("div", {className: "text-[10px] text-zinc-500 font-bold uppercase"}, "Ganancia Potencial"),
+                React.createElement("div", {className: "mono text-xl font-bold text-emerald-400"}, "$", formatNum(productos.reduce((acc, p) => acc + ((p.precio-p.costo)*p.stock), 0)))
+              ),
+              React.createElement("div", {className: "bg-zinc-900 p-4 rounded-2xl border border-zinc-800"},
+                React.createElement("div", {className: "text-[10px] text-zinc-500 font-bold uppercase"}, "SKUs Activos"),
+                React.createElement("div", {className: "mono text-xl font-bold"}, productos.length)
+              )
+            ),
+
+            // Controles de Inventario
+            React.createElement("div", {className: "flex flex-wrap items-center justify-between gap-4"},
+               React.createElement("div", {className: "flex bg-zinc-900 p-1 rounded-xl border border-zinc-800 flex-wrap"},
+                [
+                  {id: 'todos', label: 'Todos'},
+                  {id: 'bajo', label: 'Bajo Stock'},
+                  {id: 'agotado', label: 'Agotados'},
+                  {id: 'exento', label: 'Exentos'}
+                ].map(f => 
+                  React.createElement("button", {
+                    key: f.id,
+                    onClick: () => setFiltroInv(f.id),
+                    className: `px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase transition-all ${filtroInv === f.id ? 'bg-zinc-700 text-white' : 'text-zinc-500 hover:text-zinc-300'}`
+                  }, f.label)
+                )
+               ),
+               React.createElement("div", {className: "flex gap-2"},
+                 React.createElement("button", {
+                   onClick: () => setBulkModal(true),
+                   className: "bg-amber-500/10 text-amber-500 px-4 py-2 rounded-xl text-xs font-bold border border-amber-500/20"
+                 }, "⚡ Ajuste %"),
+                 React.createElement("button", {
+                   onClick: () => { setCurrentProd(null); setEditModal(true); },
+                   className: "bg-white text-black px-4 py-2 rounded-xl text-xs font-bold"
+                 }, "+ Nuevo Producto")
+               )
+            ),
+
+            // Tabla responsiva
+            React.createElement("div", {className: "bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden"},
+              React.createElement("div", {className: "overflow-x-auto"},
+                React.createElement("table", {className: "w-full text-left border-collapse"},
+                  React.createElement("thead", {className: "bg-black text-[10px] text-zinc-500 font-bold uppercase tracking-widest"},
+                    React.createElement("tr", null,
+                      ["Código", "Nombre", "Stock", "Costo", "Precio", "Margen", "Acciones"].map(h => 
+                        React.createElement("th", {className: "p-4 border-b border-zinc-800"}, h)
+                      )
+                    )
+                  ),
+                  React.createElement("tbody", {className: "text-sm divide-y divide-zinc-800"},
+                    prodsFiltrados.map(p => {
+                      const margen = ((p.precio - p.costo) / p.precio * 100).toFixed(0);
+                      return React.createElement("tr", {key: p.codigo, className: "hover:bg-black/50 transition-colors"},
+                        React.createElement("td", {className: "p-4 mono text-zinc-500"}, p.codigo),
+                        React.createElement("td", {className: "p-4 font-medium"}, 
+                          React.createElement("div", null, p.nombre),
+                          p.protegido && React.createElement("div", {className: "text-[8px] text-emerald-500 font-bold tracking-tighter"}, "PROT. CESTA BÁSICA")
+                        ),
+                        React.createElement("td", {className: "p-4"}, 
+                          React.createElement("span", {className: `px-2 py-0.5 rounded-full mono text-xs ${p.stock < 10 ? 'bg-red-500/10 text-red-400' : 'bg-zinc-800 text-zinc-400'}`}, p.stock)
+                        ),
+                        React.createElement("td", {className: "p-4 mono text-zinc-400"}, "$", formatNum(p.costo)),
+                        React.createElement("td", {className: "p-4 mono font-bold"}, "$", formatNum(p.precio)),
+                        React.createElement("td", {className: "p-4"}, 
+                          React.createElement("span", {className: "text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-300 font-bold"}, margen, "%")
+                        ),
+                        React.createElement("td", {className: "p-4 flex gap-2"},
+                          React.createElement("button", {onClick: () => { setCurrentProd(p); setEditModal(true); }, className: "text-zinc-400 hover:text-white"}, "✏️"),
+                          !p.protegido && React.createElement("button", {
+                            onClick: () => { if(confirm('¿Eliminar?')) setProductos(productos.filter(x => x.codigo !== p.codigo)); },
+                            className: "text-zinc-600 hover:text-red-400"
+                          }, "🗑️")
+                        )
+                      );
+                    })
+                  )
+                )
+              )
+            )
+          ),
+
+          // TAB: REPORTES
+          activeTab === "reportes" && React.createElement("div", {className: "space-y-6"},
+            React.createElement("div", {className: "grid md:grid-cols-3 gap-6"},
+              React.createElement("div", {className: "bg-zinc-900 p-6 rounded-3xl border border-zinc-800 text-center"},
+                React.createElement("div", {className: "text-xs text-zinc-500 mb-2 uppercase font-black"}, "Cierre de Hoy (USD)"),
+                React.createElement("div", {className: "text-4xl font-black text-white mono mb-2"}, "$", formatNum(stats.ventasHoyUSD)),
+                React.createElement("div", {className: "text-[10px] text-zinc-500 mono"}, "Bs ", formatNum(stats.ventasHoyBs)),
+                React.createElement("div", {className: "mt-4 text-xs font-bold text-zinc-400"}, stats.cantVentas, " Ventas procesadas")
+              ),
+              React.createElement("div", {className: "bg-zinc-900 p-6 rounded-3xl border border-zinc-800 flex flex-col justify-center gap-4"},
+                React.createElement("button", {
+                  onClick: handleBackup,
+                  className: "w-full bg-zinc-800 hover:bg-zinc-700 py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2"
+                }, "💾 Exportar Respaldo (JSON)"),
+                React.createElement("label", {className: "w-full bg-zinc-800 hover:bg-zinc-700 py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"},
+                   "📤 Importar Respaldo",
+                   React.createElement("input", {type: "file", accept: ".json", onChange: handleImport, className: "hidden"})
+                )
+              ),
+              React.createElement("div", {className: "bg-zinc-900 p-6 rounded-3xl border border-zinc-800 text-center flex flex-col justify-center"},
+                 React.createElement("div", {className: "text-xs text-zinc-500 mb-2 font-bold uppercase"}, "Acciones de Datos"),
+                 React.createElement("button", {
+                   onClick: () => { if(confirm("¿Eliminar historial de ventas?")) setVentas([]); },
+                   className: "text-red-400 text-[11px] font-bold hover:underline"
+                 }, "Borrar historial de ventas")
+              )
+            ),
+
+            React.createElement("div", {className: "space-y-4"},
+              React.createElement("h3", {className: "font-bold text-lg"}, "Historial Reciente"),
+              ventas.length > 0 ? ventas.slice(0, 50).map(v => 
+                React.createElement("div", {key: v.id, className: "bg-zinc-900 border border-zinc-800 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4"},
+                  React.createElement("div", null,
+                    React.createElement("div", {className: "text-[10px] text-zinc-500 mono"}, v.fecha),
+                    React.createElement("div", {className: "font-bold text-sm"}, "Ticket #", v.id.toString().slice(-6)),
+                    React.createElement("div", {className: "text-[10px] text-zinc-400"}, v.items.length, " productos")
+                  ),
+                  React.createElement("div", {className: "text-right flex items-center gap-6"},
+                    React.createElement("div", null,
+                      React.createElement("div", {className: "mono font-black text-emerald-400"}, "$", formatNum(v.totalUSD)),
+                      React.createElement("div", {className: "text-[9px] text-zinc-500"}, "Tasa: ", v.tasa)
+                    ),
+                    React.createElement("button", {
+                      onClick: () => shareWhatsApp(v),
+                      className: "bg-emerald-500 w-10 h-10 rounded-full grid place-items-center text-black shadow-lg shadow-emerald-500/20 active:scale-90 transition-all"
+                    }, "📲")
+                  )
+                )
+              ) : React.createElement("div", {className: "text-center py-10 opacity-30 text-xs"}, "No hay ventas registradas")
+            )
+          )
+        ),
+
+        // MODAL DE TICKET EXITOSO
+        showTicketModal && React.createElement("div", {className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 glass"},
+          React.createElement("div", {className: "bg-zinc-900 border border-zinc-700 w-full max-w-sm rounded-[40px] p-8 animate-slide-up shadow-2xl relative"},
+             React.createElement("div", {className: "w-20 h-20 bg-emerald-500 rounded-full mx-auto grid place-items-center mb-6 shadow-xl shadow-emerald-500/30"}, 
+               React.createElement("span", {className: "text-4xl text-black"}, "✓")
+             ),
+             React.createElement("h2", {className: "text-center text-2xl font-black mb-2"}, "VENTA EXITOSA"),
+             React.createElement("p", {className: "text-center text-zinc-400 text-sm mb-8"}, "El stock ha sido actualizado correctamente."),
+             
+             React.createElement("div", {className: "bg-black/50 rounded-3xl p-6 border border-zinc-800 mb-8 space-y-4"},
+                React.createElement("div", {className: "flex justify-between items-center"},
+                  React.createElement("span", {className: "text-xs text-zinc-500 font-bold uppercase"}, "Total Cobrado"),
+                  React.createElement("span", {className: "text-xl mono font-black text-white"}, "$", formatNum(lastVenta?.totalUSD || 0))
+                ),
+                React.createElement("button", {
+                  onClick: () => shareWhatsApp(lastVenta),
+                  className: "w-full bg-emerald-500 text-black py-3 rounded-2xl text-xs font-black tracking-widest hover:brightness-110 flex items-center justify-center gap-2"
+                }, "📲 ENVIAR POR WHATSAPP")
+             ),
+             
+             React.createElement("button", {
+               onClick: () => setShowTicketModal(false),
+               className: "w-full bg-zinc-800 py-3 rounded-2xl text-xs font-bold text-zinc-300"
+             }, "CERRAR VENTANA")
+          )
+        ),
+
+        // MODAL EDIT/NEW PRODUCT
+        editModal && React.createElement("div", {className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 glass"},
+           React.createElement("div", {className: "bg-zinc-900 border border-zinc-800 w-full max-w-md rounded-3xl p-6 space-y-4 shadow-2xl"},
+             React.createElement("h3", {className: "font-bold text-lg"}, currentProd ? 'Editar Producto' : 'Nuevo Producto'),
+             React.createElement("div", {className: "grid grid-cols-2 gap-4 text-xs font-bold text-zinc-500 uppercase"},
+               React.createElement("div", {className: "col-span-2 space-y-1"},
+                 React.createElement("label", null, "Nombre"),
+                 React.createElement("input", {
+                   id: "ed-nombre",
+                   defaultValue: currentProd?.nombre || "",
+                   disabled: currentProd?.protegido,
+                   className: "w-full bg-black border border-zinc-800 rounded-xl p-3 text-white disabled:opacity-50"
+                 })
+               ),
+               React.createElement("div", {className: "space-y-1"},
+                 React.createElement("label", null, "Código"),
+                 React.createElement("input", {
+                   id: "ed-codigo",
+                   defaultValue: currentProd?.codigo || "",
+                   disabled: currentProd?.protegido,
+                   className: "w-full bg-black border border-zinc-800 rounded-xl p-3 mono text-white disabled:opacity-50"
+                 })
+               ),
+               React.createElement("div", {className: "space-y-1"},
+                 React.createElement("label", null, "IVA %"),
+                 React.createElement("select", {
+                   id: "ed-iva",
+                   defaultValue: currentProd?.iva || 0,
+                   disabled: currentProd?.protegido,
+                   className: "w-full bg-black border border-zinc-800 rounded-xl p-3 text-white"
+                 }, [0, 16].map(v => React.createElement("option", {key: v, value: v}, v === 0 ? "Exento (0%)" : "Gravado (16%)")))
+               ),
+               React.createElement("div", {className: "space-y-1"},
+                 React.createElement("label", null, "Stock"),
+                 React.createElement("input", {
+                   id: "ed-stock",
+                   type: "number",
+                   defaultValue: currentProd?.stock || 0,
+                   className: "w-full bg-black border border-zinc-800 rounded-xl p-3 mono text-white"
+                 })
+               ),
+               React.createElement("div", {className: "space-y-1"},
+                 React.createElement("label", null, "Costo ($)"),
+                 React.createElement("input", {
+                   id: "ed-costo",
+                   type: "number",
+                   step: "0.01",
+                   defaultValue: currentProd?.costo || 0,
+                   className: "w-full bg-black border border-zinc-800 rounded-xl p-3 mono text-white"
+                 })
+               ),
+               React.createElement("div", {className: "col-span-2 space-y-1"},
+                 React.createElement("label", null, "Precio de Venta ($)"),
+                 React.createElement("input", {
+                   id: "ed-precio",
+                   type: "number",
+                   step: "0.01",
+                   defaultValue: currentProd?.precio || 0,
+                   className: "w-full bg-black border border-zinc-800 rounded-xl p-3 mono text-xl font-black text-emerald-400"
+                 })
+               )
+             ),
+             React.createElement("div", {className: "flex gap-2 pt-4"},
+               React.createElement("button", {onClick: () => setEditModal(false), className: "flex-1 bg-zinc-800 py-3 rounded-2xl font-bold text-xs"}, "CANCELAR"),
+               React.createElement("button", {
+                 onClick: () => {
+                    const n = document.getElementById("ed-nombre").value;
+                    const c = document.getElementById("ed-codigo").value;
+                    const s = parseInt(document.getElementById("ed-stock").value);
+                    const co = parseFloat(document.getElementById("ed-costo").value);
+                    const pr = parseFloat(document.getElementById("ed-precio").value);
+                    const iv = parseInt(document.getElementById("ed-iva").value);
+                    
+                    if(!n || !c) return alert("Faltan datos");
+
+                    if(currentProd) {
+                      setProductos(productos.map(p => p.codigo === currentProd.codigo ? {...p, nombre: n, codigo: c, stock: s, costo: co, precio: pr, iva: iv} : p));
+                    } else {
+                      if(productos.find(x => x.codigo === c)) return alert("Código ya existe");
+                      setProductos([...productos, {codigo: c, nombre: n, stock: s, costo: co, precio: pr, iva: iv, protegido: false}]);
+                    }
+                    setEditModal(false);
+                 },
+                 className: "flex-1 bg-white text-black py-3 rounded-2xl font-bold text-xs"
+               }, "GUARDAR CAMBIOS")
+             )
+           )
+        ),
+
+        // MODAL BULK ADJUST
+        bulkModal && React.createElement("div", {className: "fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 glass"},
+           React.createElement("div", {className: "bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-xs space-y-4"},
+             React.createElement("h3", {className: "font-bold text-center"}, "Ajuste Masivo de Precios"),
+             React.createElement("p", {className: "text-[10px] text-zinc-500 text-center"}, "Solo aplica a productos gravados (IVA 16%)."),
+             [5, 10, 15, 20, 30].map(pct => 
+               React.createElement("button", {
+                 key: pct,
+                 onClick: () => bulkPriceIncrease(pct),
+                 className: "w-full bg-zinc-800 hover:bg-zinc-700 py-3 rounded-2xl text-xs font-bold"
+               }, `Subir +${pct}%`)
+             ),
+             React.createElement("button", {onClick: () => setBulkModal(false), className: "w-full text-zinc-500 py-2 text-[10px] font-bold uppercase"}, "Cerrar")
+           )
+        )
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(React.StrictMode, null, React.createElement(App)));
+  </script>
+
+  <!-- SISTEMA DE SEGURIDAD ELIX-0603 (Inalterado) -->
+  <script>
+  (function(){
+    const FORMULA = (base) => {
+      base = (base || '').toUpperCase().replace(/[^A-Z]/g,'').slice(0,4).padEnd(4,'X');
+      let sum = 0; for(let c of base) sum += c.charCodeAt(0);
+      let code = (sum * 37 + 9281) % 10000;
+      return base + '-' + String(code).padStart(4,'0');
+    };
+    const VALIDAR = (licencia) => {
+      if(!/^[A-Z]{4}-\d{4}$/.test(licencia)) return false;
+      let [base, num] = licencia.split('-');
+      return FORMULA(base) === licencia;
+    };
+    const CSS = `
+    #elix-activation-overlay{position:fixed;inset:0;z-index:999999;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;font-family:sans-serif;}
+    .elix-card{background:#171717;border:1px solid #2a2a2a;border-radius:24px;padding:24px;width:100%;max-width:380px;text-align:center;}
+    .elix-input{width:100%;background:#0a0a0a;border:1.5px solid #333;border-radius:12px;padding:14px;color:#fff;font-size:18px;text-transform:uppercase;margin-top:20px;outline:none;}
+    .elix-btn{width:100%;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px;}
+    .elix-btn-white{background:#fff;color:#000;}
+    .elix-btn-green{background:#22c55e;color:#000;}
+    #elix-owner-modal{position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;}
+    #elix-owner-modal.open{display:flex;}
+    .elix-owner-card{background:#111;border:1px solid #333;border-radius:24px;padding:20px;width:320px;}
+    `;
+    const style = document.createElement('style'); style.textContent = CSS; document.head.appendChild(style);
+
+    function crearOverlay(){
+      if(document.getElementById('elix-activation-overlay')) return;
+      const div = document.createElement('div');
+      div.id = 'elix-activation-overlay';
+      div.innerHTML = `
+        <div class="elix-card">
+          <div style="font-size:24px;font-weight:800;color:#fff;margin-bottom:10px">TasaStock PRO</div>
+          <div style="color:#888;font-size:14px;">Ingresa tu código de licencia para activar el software.</div>
+          <input id="elix-lic-input" class="elix-input" placeholder="ABCD-0000" maxlength="9">
+          <button id="elix-activar" class="elix-btn elix-btn-white">Activar Licencia</button>
+          <button onclick="window.open('https://wa.me/56900000000','_blank')" class="elix-btn elix-btn-green">Contactar Soporte</button>
+        </div>
+        <div id="elix-logo-trigger" style="margin-top:20px;width:40px;height:40px;opacity:0.1"></div>
+      `;
+      document.body.appendChild(div);
+      document.getElementById('elix-activar').onclick = () => {
+        let val = document.getElementById('elix-lic-input').value.toUpperCase().trim();
+        if(VALIDAR(val)){ localStorage.setItem('elix_license', val); div.remove(); } else { alert('Licencia inválida.'); }
+      };
+    }
+
+    function crearOwnerModal(){
+      const m = document.createElement('div');
+      m.id = 'elix-owner-modal';
+      m.innerHTML = `
+        <div class="elix-owner-card">
+          <div style="color:#fff;font-weight:800;margin-bottom:15px">GENERADOR DE LICENCIAS</div>
+          <input id="elix-base" class="elix-input" placeholder="NOMBRE" maxlength="4">
+          <div id="elix-res" style="color:#fff;font-size:24px;font-weight:900;margin:15px 0;text-align:center">----</div>
+          <button id="elix-gen" class="elix-btn elix-btn-white">Generar</button>
+          <button id="elix-close" class="elix-btn" style="background:#222;color:#fff">Cerrar</button>
+        </div>
+      `;
+      document.body.appendChild(m);
+      document.getElementById('elix-gen').onclick = () => {
+        let b = document.getElementById('elix-base').value || 'ABCD';
+        document.getElementById('elix-res').innerText = FORMULA(b);
+      };
+      document.getElementById('elix-close').onclick = () => m.classList.remove('open');
+    }
+
+    let toques = 0; let timer = null;
+    document.addEventListener('click', (ev)=>{
+      if(ev.target.id === 'elix-logo-trigger'){
+        toques++; clearTimeout(timer);
+        timer = setTimeout(()=> toques = 0, 3000);
+        if(toques >= 5) document.getElementById('elix-owner-modal').classList.add('open');
+      }
+    });
+
+    const lic = localStorage.getItem('elix_license');
+    if(!lic || !VALIDAR(lic)) crearOverlay();
+    crearOwnerModal();
+  })();
+  </script>
+</body>
+</html>
