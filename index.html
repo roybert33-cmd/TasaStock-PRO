@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TasaStock PRO - Cesta Básica</title>
+  <title>TasaStock PRO - Cesta Básica 2026</title>
 
   <!-- PWA -->
   <meta name="theme-color" content="#0a0a0a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
+  <!-- React & Babel -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -23,6 +24,8 @@
       --border: #27272a;
       --accent: #ffffff;
       --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
       --text-dim: #71717a;
     }
 
@@ -32,86 +35,150 @@
       background: var(--bg); 
       color: #fafafa; 
       font-family: 'Geist', sans-serif;
+      overflow-x: hidden;
     }
 
     .mono { font-family: 'Geist Mono', monospace; }
 
-    /* HEADER RESPONSIVE */
+    /* UI MEJORADA */
     header {
       position: sticky;
       top: 0;
-      z-index: 40;
+      z-index: 50;
       background: rgba(7, 7, 8, 0.8);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      padding: 10px 15px;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      height: 64px;
     }
 
-    /* GRID DE PRODUCTOS */
-    .product-grid {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(2, 1fr); /* 2 columnas en movil */
+    .nav-pill {
+      display: flex;
+      background: #111113;
+      padding: 4px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
     }
 
-    @media (min-width: 768px) {
-      .product-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+    .pill-btn {
+      padding: 6px 20px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
     }
 
-    /* LAYOUT CAJA */
-    .caja-layout {
+    .pill-btn.active { background: #fff; color: #000; }
+    .pill-btn.inactive { background: transparent; color: var(--text-dim); }
+
+    .main-content {
+      padding: 16px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    /* GRID SISTEMA POS */
+    .pos-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 20px;
+      gap: 16px;
     }
 
     @media (min-width: 1024px) {
-      .caja-layout { grid-template-columns: 1fr 380px; align-items: start; }
-      .sticky-cart { position: sticky; top: 84px; }
+      .pos-grid { grid-template-columns: 1fr 400px; align-items: start; }
     }
 
-    /* TARJETAS */
-    .card {
+    /* TARJETAS DE PRODUCTO CAJA */
+    .product-list {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 768px) {
+      .product-list { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+    }
+
+    .p-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 12px;
       display: flex;
       flex-direction: column;
       gap: 8px;
+      position: relative;
+      transition: 0.1s;
+    }
+    .p-card:active { transform: scale(0.97); background: #16161a; }
+    
+    .badge-prot {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
     }
 
-    .input-touch {
-      background: #121214;
+    /* TICKET ESTILO APPLE */
+    .ticket-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (min-width: 1024px) {
+      .sticky-ticket { position: sticky; top: 80px; }
+    }
+
+    /* MODALES */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    @media (min-width: 640px) { .modal-overlay { align-items: center; padding: 20px; } }
+
+    .modal-box {
+      background: #111113;
+      width: 100%;
+      max-width: 450px;
+      border-radius: 24px 24px 0 0;
+      padding: 24px;
+      border: 1px solid var(--border);
+    }
+    @media (min-width: 640px) { .modal-box { border-radius: 24px; } }
+
+    .input-group { margin-bottom: 16px; }
+    .input-label { display: block; font-size: 11px; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+    .input-field {
+      background: #000;
       border: 1px solid var(--border);
       color: #fff;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 16px; /* Evita zoom molesto en iPhone */
+      padding: 12px 16px;
+      border-radius: 12px;
       width: 100%;
+      font-size: 16px;
       outline: none;
     }
+    .input-field:focus { border-color: var(--accent); }
 
-    .btn-nav {
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .btn-active { background: #fff; color: #000; }
-    .btn-inactive { background: transparent; color: var(--text-dim); }
-
-    /* ESTILOS ELIX (NO TOCAR) */
-    #elix-activation-overlay{position:fixed;inset:0;z-index:999999;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
-    .elix-card{background:#171717;border:1px solid #2a2a2a;border-radius:24px;padding:24px;width:100%;max-width:380px;margin-top:32px;}
-    .elix-input{width:100%;background:#0a0a0a;border:1.5px solid #333;border-radius:12px;padding:14px;color:#fff;font-size:18px;text-transform:uppercase;outline:none;text-align:center}
-    .elix-btn{width:100%;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px}
+    /* ELIX SYSTEM STYLES (REQUIRED) */
+    #elix-activation-overlay { position: fixed; inset: 0; z-index: 999999; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
   </style>
 </head>
 <body>
@@ -120,238 +187,165 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo } = React;
 
-    const PRODUCTOS_INICIALES = [
-      {codigo:"0001",nombre:"Arroz Mary 1kg",stock:200,costo:1.2,precio:1.6,iva:0,protegido:true},
-      {codigo:"0002",nombre:"Harina PAN 1kg",stock:100,costo:1.5,precio:1.9,iva:0,protegido:true},
-      {codigo:"0003",nombre:"Harina Doña María 1kg",stock:100,costo:1.4,precio:1.85,iva:0,protegido:true},
-      {codigo:"0011",nombre:"Huevos Cartón 30un",stock:100,costo:4.8,precio:6.5,iva:0,protegido:true},
-      {codigo:"0102",nombre:"Refresco Coca-Cola 2L",stock:50,costo:1.2,precio:1.8,iva:16,protegido:false}
-      // ... se pueden añadir los otros 30+ aquí
-    ];
-
     function App() {
+      // 1. ESTADO DE DATOS (Mismo Key que original)
       const [productos, setProductos] = useState(() => {
         const saved = localStorage.getItem("pos_cesta_basica_2026_v3");
-        return saved ? JSON.parse(saved) : PRODUCTOS_INICIALES;
+        return saved ? JSON.parse(saved) : []; 
       });
 
       const [tab, setTab] = useState('caja');
-      const [cart, setCart] = useState([]);
-      const [busqueda, setBusqueda] = useState('');
+      const [carrito, setCarrito] = useState([]);
+      const [search, setSearch] = useState('');
       const [tasa, setTasa] = useState(68.5);
+      
+      // Estado para Nuevo/Editar Producto
+      const [isModalOpen, setIsModalOpen] = useState(false);
+      const [editingProd, setEditingProd] = useState(null);
+      const [formData, setFormData] = useState({ codigo: '', nombre: '', stock: 0, costo: 0, precio: 0, iva: 0 });
 
+      // Guardado automático
       useEffect(() => {
         localStorage.setItem("pos_cesta_basica_2026_v3", JSON.stringify(productos));
       }, [productos]);
 
-      const formatCur = (n) => n.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      // Formateo de moneda
+      const f = (n) => Number(n).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+      // Filtrado
       const filtered = useMemo(() => {
         return productos.filter(p => 
-          p.nombre.toLowerCase().includes(busqueda.toLowerCase()) || p.codigo.includes(busqueda)
+          p.nombre.toLowerCase().includes(search.toLowerCase()) || p.codigo.includes(search)
         );
-      }, [productos, busqueda]);
+      }, [productos, search]);
 
-      const totalUSD = cart.reduce((acc, item) => acc + (item.precio * item.qty), 0);
+      const totalUSD = carrito.reduce((acc, i) => acc + (i.precio * i.qty), 0);
 
-      const addCart = (p) => {
+      // ACCIONES
+      const handleAddToCart = (p) => {
         if(p.stock <= 0) return;
-        const exist = cart.find(c => c.codigo === p.codigo);
+        const exist = carrito.find(c => c.codigo === p.codigo);
         if(exist) {
-          if(exist.qty < p.stock) setCart(cart.map(c => c.codigo === p.codigo ? {...c, qty: c.qty+1} : c));
+          if(exist.qty < p.stock) setCarrito(carrito.map(c => c.codigo === p.codigo ? {...c, qty: c.qty+1} : c));
         } else {
-          setCart([...cart, {...p, qty: 1}]);
+          setCarrito([...carrito, {...p, qty: 1}]);
         }
       };
 
-      const changeQty = (cod, d) => {
-        setCart(cart.map(item => {
+      const updateQty = (cod, delta) => {
+        setCarrito(prev => prev.map(item => {
           if(item.codigo === cod) {
-            const n = item.qty + d;
-            return (n > 0 && n <= item.stock) ? {...item, qty: n} : item;
+            const newQty = item.qty + delta;
+            return (newQty > 0 && newQty <= item.stock) ? {...item, qty: newQty} : item;
           }
           return item;
-        }));
+        }).filter(i => i.qty > 0));
       };
 
-      const cobrar = () => {
-        if(cart.length === 0) return;
-        const res = productos.map(p => {
-          const c = cart.find(x => x.codigo === p.codigo);
-          return c ? {...p, stock: p.stock - c.qty} : p;
+      const openNewProduct = () => {
+        setEditingProd(null);
+        setFormData({ codigo: '', nombre: '', stock: '', costo: '', precio: '', iva: 0 });
+        setIsModalOpen(true);
+      };
+
+      const openEditProduct = (p) => {
+        setEditingProd(p);
+        setFormData({...p});
+        setIsModalOpen(true);
+      };
+
+      const saveProduct = () => {
+        if(!formData.codigo || !formData.nombre) return alert("Código y Nombre requeridos");
+        
+        if(editingProd) {
+          // Editar existente
+          setProductos(productos.map(p => p.codigo === editingProd.codigo ? {...formData, stock: Number(formData.stock), precio: Number(formData.precio)} : p));
+        } else {
+          // Nuevo: Validar que el código no exista
+          if(productos.some(p => p.codigo === formData.codigo)) return alert("El código ya existe");
+          setProductos([...productos, {...formData, stock: Number(formData.stock), precio: Number(formData.precio), protegido: false}]);
+        }
+        setIsModalOpen(false);
+      };
+
+      const procesarVenta = () => {
+        if(carrito.length === 0) return;
+        const nuevosProds = productos.map(p => {
+          const enCart = carrito.find(c => c.codigo === p.codigo);
+          return enCart ? { ...p, stock: p.stock - enCart.qty } : p;
         });
-        setProductos(res);
-        setCart([]);
-        alert("¡Cobro Exitoso!");
+        setProductos(nuevosProds);
+        setCarrito([]);
+        alert("Cobro exitoso y stock actualizado");
       };
 
       return (
         <div style={{minHeight:'100vh', display:'flex', flexDirection:'column'}}>
           <header>
-            <div id="elix-logo-trigger" style={{display:'flex', alignItems:'center', gap:'10px'}}>
-              <div style={{background:'#fff', color:'#000', width:'32px', height:'32px', borderRadius:'8px', display:'grid', placeItems:'center', fontWeight:'800', fontSize:'12px'}}>POS</div>
-              <div className="hide-mobile">
-                <div style={{fontSize:'12px', fontWeight:'700', letterSpacing:'1px'}}>TasaStock PRO</div>
-                <div style={{fontSize:'9px', color: 'var(--text-dim)'}}>INVENTARIO • CAJA</div>
+            <div id="elix-logo-trigger" style={{display:'flex', alignItems:'center', gap:'12px'}}>
+              <div style={{background:'#fff', color:'#000', width:'32px', height:'32px', borderRadius:'10px', display:'grid', placeItems:'center', fontWeight:'800', fontSize:'11px'}}>PRO</div>
+              <div>
+                <div style={{fontSize:'13px', fontWeight:'700', letterSpacing:'1px'}}>TasaStock</div>
+                <div style={{fontSize:'9px', color: 'var(--text-dim)'}}>SISTEMA POS 2026</div>
               </div>
             </div>
             
-            <div style={{display:'flex', background:'#121214', padding:'4px', borderRadius:'30px', border:'1px solid var(--border)'}}>
-              <button onClick={()=>setTab('caja')} className={`btn-nav ${tab==='caja'?'btn-active':'btn-inactive'}`}>Caja</button>
-              <button onClick={()=>setTab('inv')} className={`btn-nav ${tab==='inv'?'btn-active':'btn-inactive'}`}>Stock</button>
+            <div className="nav-pill">
+              <button onClick={()=>setTab('caja')} className={`pill-btn ${tab==='caja'?'active':'inactive'}`}>Caja</button>
+              <button onClick={()=>setTab('inv')} className={`pill-btn ${tab==='inv'?'active':'inactive'}`}>Stock</button>
             </div>
           </header>
 
-          <main style={{flex:1, padding:'15px'}}>
+          <main className="main-content">
             {tab === 'caja' ? (
-              <div className="caja-layout">
+              <div className="pos-grid">
                 <div>
-                  <input className="input-touch" placeholder="Buscar producto o código..." value={busqueda} onChange={e=>setBusqueda(e.target.value)} />
-                  <div className="product-grid" style={{marginTop:'15px'}}>
+                  <input className="input-field" style={{marginBottom:'16px'}} placeholder="Buscar por nombre o código..." value={search} onChange={e=>setSearch(e.target.value)} />
+                  
+                  <div className="product-list">
+                    {filtered.length === 0 && <div style={{gridColumn:'1/-1', textAlign:'center', padding:'40px', color:'var(--text-dim)'}}>No hay productos registrados</div>}
                     {filtered.map(p => (
-                      <div key={p.codigo} className="card" onClick={() => addCart(p)}>
-                        <div style={{display:'flex', justifyContent:'space-between', fontSize:'11px'}}>
-                          <span className="badge mono">{p.codigo}</span>
-                          <span style={{color: p.stock < 5 ? 'var(--danger)' : 'var(--success)'}}>{p.stock} disp</span>
+                      <div key={p.codigo} className="p-card" onClick={() => handleAddToCart(p)}>
+                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                          <span className="mono" style={{fontSize:'10px', color:'var(--text-dim)'}}>{p.codigo}</span>
+                          {p.protegido && <span className="badge-prot">PROT</span>}
                         </div>
-                        <div style={{fontSize:'14px', fontWeight:'600', height:'40px', overflow:'hidden'}}>{p.nombre}</div>
+                        <div style={{fontSize:'14px', fontWeight:'600', height:'38px', overflow:'hidden'}}>{p.nombre}</div>
                         <div style={{marginTop:'auto'}}>
-                          <div className="mono" style={{fontSize:'18px', fontWeight:'700'}}>${formatCur(p.precio)}</div>
-                          <div className="mono" style={{fontSize:'11px', color:'var(--text-dim)'}}>Bs {formatCur(p.precio * tasa)}</div>
+                          <div className="mono" style={{fontSize:'18px', fontWeight:'700'}}>${f(p.precio)}</div>
+                          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:'4px'}}>
+                            <span className="mono" style={{fontSize:'10px', color:'var(--text-dim)'}}>Bs {f(p.precio * tasa)}</span>
+                            <span className="mono" style={{fontSize:'10px', color: p.stock < 5 ? 'var(--danger)' : 'var(--success)'}}>{p.stock} pz</span>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="sticky-cart">
-                  <div className="card" style={{padding:'0', overflow:'hidden'}}>
-                    <div style={{padding:'15px', borderBottom:'1px solid var(--border)', fontWeight:'700'}}>Ticket de Venta</div>
-                    <div style={{maxHeight:'300px', overflowY:'auto', padding:'15px'}}>
-                      {cart.length === 0 ? <div style={{textAlign:'center', color: 'var(--text-dim)', padding:'20px'}}>Vacio</div> : 
-                        cart.map(item => (
-                          <div key={item.codigo} style={{display:'flex', justifyContent:'space-between', marginBottom:'12px'}}>
+                <div className="sticky-ticket">
+                  <div className="ticket-container">
+                    <div style={{padding:'16px', borderBottom:'1px solid var(--border)', fontWeight:'700', display:'flex', justifyContent:'space-between'}}>
+                      <span>Resumen</span>
+                      <span className="mono" style={{color: 'var(--text-dim)'}}>{carrito.length} items</span>
+                    </div>
+                    <div style={{padding:'16px', maxHeight:'350px', overflowY:'auto'}}>
+                      {carrito.length === 0 ? <div style={{textAlign:'center', color: 'var(--text-dim)', padding:'30px'}}>Carrito vacío</div> : 
+                        carrito.map(item => (
+                          <div key={item.codigo} style={{display:'flex', justifyContent:'space-between', marginBottom:'16px'}}>
                             <div style={{flex:1}}>
-                              <div style={{fontSize:'13px'}}>{item.nombre}</div>
-                              <div className="mono" style={{fontSize:'11px', color:'var(--text-dim)'}}>${formatCur(item.precio)} x {item.qty}</div>
+                              <div style={{fontSize:'13px', fontWeight:'600'}}>{item.nombre}</div>
+                              <div className="mono" style={{fontSize:'11px', color:'var(--text-dim)'}}>${f(item.precio)} x {item.qty}</div>
                             </div>
-                            <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-                               <button onClick={()=>changeQty(item.codigo, -1)} style={{width:'28px', height:'28px', borderRadius:'50%', border:'1px solid var(--border)', background:'none', color:'#fff'}}>-</button>
-                               <button onClick={()=>changeQty(item.codigo, 1)} style={{width:'28px', height:'28px', borderRadius:'50%', border:'1px solid var(--border)', background:'none', color:'#fff'}}>+</button>
+                            <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                              <button onClick={(e)=>{e.stopPropagation(); updateQty(item.codigo, -1)}} style={{width:'32px', height:'32px', borderRadius:'50%', border:'1px solid var(--border)', background:'#16161a', color:'#fff'}}>-</button>
+                              <button onClick={(e)=>{e.stopPropagation(); updateQty(item.codigo, 1)}} style={{width:'32px', height:'32px', borderRadius:'50%', border:'1px solid var(--border)', background:'#16161a', color:'#fff'}}>+</button>
                             </div>
                           </div>
                         ))
                       }
                     </div>
-                    <div style={{background:'#121214', padding:'15px', borderTop:'1px solid var(--border)'}}>
-                      <div style={{display:'flex', justifyContent:'space-between', marginBottom:'15px'}}>
-                        <span style={{color: 'var(--text-dim)'}}>Total USD</span>
-                        <span className="mono" style={{fontSize:'22px', fontWeight:'700'}}>${formatCur(totalUSD)}</span>
-                      </div>
-                      <div style={{display:'flex', justifyContent:'space-between', marginBottom:'15px', color:'var(--success)'}}>
-                        <span>Total BS</span>
-                        <span className="mono">Bs {formatCur(totalUSD * tasa)}</span>
-                      </div>
-                      <button onClick={cobrar} className="btn-nav btn-active" style={{width:'100%', height:'50px', fontSize:'16px'}}>Finalizar Cobro</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="card">
-                <div style={{padding:'10px', fontWeight:'700', fontSize:'18px'}}>Inventario</div>
-                {productos.map(p => (
-                  <div key={p.codigo} style={{padding:'12px', borderBottom:'1px solid var(--border)', display:'flex', justifyContent:'space-between'}}>
-                    <div>
-                      <div style={{fontSize:'14px', fontWeight:'600'}}>{p.nombre} {p.protegido && '🛡️'}</div>
-                      <div className="mono" style={{fontSize:'12px', color:'var(--text-dim)'}}>{p.codigo} • Costo: ${p.costo}</div>
-                    </div>
-                    <div style={{textAlign:'right'}}>
-                      <div className="mono" style={{fontSize:'14px'}}>${formatCur(p.precio)}</div>
-                      <div className="mono" style={{fontSize:'12px'}}>Stock: {p.stock}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </main>
-          
-          <footer style={{textAlign:'center', padding:'20px', color: 'var(--text-dim)', fontSize:'10px'}} className="mono">
-            POS CESTA BÁSICA 2026 • KEY: pos_cesta_basica_2026_v3
-          </footer>
-        </div>
-      );
-    }
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
-
-  <script>
-  // INICIO SISTEMA ELIX-0603 - RESTAURADO COMPLETAMENTE
-  (function(){
-    const FORMULA = (base) => {
-      base = (base || '').toUpperCase().replace(/[^A-Z]/g,'').slice(0,4).padEnd(4,'X');
-      let sum = 0; for(let c of base) sum += c.charCodeAt(0);
-      let code = (sum * 37 + 9281) % 10000;
-      return base + '-' + String(code).padStart(4,'0');
-    };
-    const VALIDAR = (licencia) => {
-      if(!/^[A-Z]{4}-\d{4}$/.test(licencia)) return false;
-      let [base, num] = licencia.split('-');
-      return FORMULA(base) === licencia;
-    };
-
-    function crearOverlay(){
-      if(document.getElementById('elix-activation-overlay')) return;
-      const div = document.createElement('div');
-      div.id = 'elix-activation-overlay';
-      div.innerHTML = `
-        <div style="background:#fff; width:60px; height:60px; border-radius:15px; margin-bottom:20px;"></div>
-        <div style="color:#fff; font-size:24px; font-weight:800;">TasaStock PRO</div>
-        <div class="elix-card">
-          <div style="color:#fff; margin-bottom:15px; text-align:center">Activación Requerida</div>
-          <input id="elix-lic-input" class="elix-input" placeholder="XXXX-0000" maxlength="9">
-          <button id="elix-activar" class="elix-btn" style="background:#fff; color:#000">Activar Licencia</button>
-        </div>
-      `;
-      document.body.appendChild(div);
-      document.getElementById('elix-activar').onclick = () => {
-        let val = document.getElementById('elix-lic-input').value.toUpperCase().trim();
-        if(VALIDAR(val)){
-          localStorage.setItem('elix_license', val);
-          div.remove();
-        } else {
-          alert('Código de licencia inválido.');
-        }
-      };
-    }
-
-    // Lógica de 5 toques para el Panel del Dueño
-    let toques = 0; let timer = null;
-    function handleLogoClick(){
-      toques++;
-      if(timer) clearTimeout(timer);
-      timer = setTimeout(()=> toques = 0, 3000);
-      if(toques >= 5){
-        toques = 0;
-        let p = prompt("PASSWORD DUEÑO:");
-        if(p === "0603") {
-            let base = prompt("NOMBRE BASE (4 letras):", "BODE");
-            alert("CÓDIGO GENERADO: " + FORMULA(base));
-        }
-      }
-    }
-
-    function init(){
-      const lic = localStorage.getItem('elix_license');
-      if(!lic || !VALIDAR(lic)) crearOverlay();
-      document.addEventListener('click', (e)=>{
-        if(e.target.closest('#elix-logo-trigger')) handleLogoClick();
-      });
-    }
-    init();
-  })();
-  </script>
-</body>
-</html>
+                    <div style={{padding:'20px', background:'#111113', borderTop:'1px solid var(--border)'}}>
+                       <div style={{display:'flex', justifyContent:'space-between', marginBottom:'8px'}}>
+                          <span style={{color:'var(--text-dim)', fontSize:'14px'}}>Total USD</span>
+                          <span className="mono" style={{fontSize:'24px', fontWeight:'7
