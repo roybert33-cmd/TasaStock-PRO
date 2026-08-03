@@ -2,152 +2,212 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TasaStock PRO - v4.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TasaStock PRO - Mobile</title>
 
-  <!-- PWA -->
+  <!-- PWA - Capacidad de instalar como App -->
   <meta name="theme-color" content="#0a0a0a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1162/1162499.png">
 
   <style>
-    /* Estilos base y fuentes */
     @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
     
     :root {
       --bg: #070708;
       --card: #0e0e10;
-      --accent: #ffffff;
       --border: #27272a;
-      --text-dim: #71717a;
+      --accent: #ffffff;
       --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #fafafa;
+      --text-dim: #71717a;
+      /* Altura del header y bottom bar */
+      --header-h: 60px;
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * { 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent; 
+      touch-action: manipulation; 
+    }
+
     body { 
       margin: 0; 
       background: var(--bg); 
-      color: #fafafa; 
+      color: var(--text-main); 
       font-family: 'Geist', sans-serif;
-      overflow-x: hidden;
+      overscroll-behavior-y: contain;
     }
 
     .mono { font-family: 'Geist Mono', monospace; }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    /* LAYOUT PRINCIPAL */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
-    /* Utility Classes (Tailwind-like) */
-    .flex { display: flex; }
-    .grid { display: grid; }
-    .items-center { align-items: center; }
-    .justify-between { justify-content: space-between; }
-    .gap-2 { gap: 0.5rem; }
-    .p-4 { padding: 1rem; }
-    .rounded-xl { border-radius: 1rem; }
-    .border { border: 1px solid var(--border); }
-    .w-full { width: 100%; }
-    .text-center { text-align: center; }
-
-    /* Header */
     header {
+      height: var(--header-h);
       position: sticky;
       top: 0;
-      z-index: 50;
-      background: rgba(7, 7, 8, 0.8);
-      backdrop-filter: blur(12px);
+      z-index: 100;
+      background: rgba(7, 7, 8, 0.85);
+      backdrop-filter: blur(15px);
       border-bottom: 1px solid var(--border);
-      height: 64px;
-    }
-
-    /* Botones */
-    .btn {
-      padding: 0.5rem 1rem;
-      border-radius: 99px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 1px solid transparent;
-      display: inline-flex;
+      padding: 0 1rem;
+      display: flex;
       align-items: center;
-      gap: 0.5rem;
-      font-size: 13px;
+      justify-content: space-between;
     }
-    .btn-white { background: #fff; color: #000; }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: #fff; }
-    .btn-outline:hover { background: var(--border); }
-    .btn-ghost { color: var(--text-dim); }
-    .btn-ghost:hover { color: #fff; }
 
-    /* Inputs */
-    .input-main {
-      background: #121214;
-      border: 1px solid var(--border);
-      color: #fff;
-      padding: 0.75rem 1rem;
-      border-radius: 0.75rem;
-      outline: none;
+    main {
+      flex: 1;
+      padding: 1rem;
+      max-width: 1400px;
+      margin: 0 auto;
       width: 100%;
     }
-    .input-main:focus { border-color: #52525b; }
 
-    /* Badge */
-    .badge {
-      font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 99px;
-      text-transform: uppercase;
-      font-weight: 700;
+    /* GRID DEL POS */
+    .pos-grid {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: 1fr; /* Móvil: 1 columna */
     }
-    .badge-exento { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
 
-    /* Cards */
+    @media (min-width: 1024px) {
+      .pos-grid {
+        grid-template-columns: 1fr 400px; /* Escritorio/Tablet landscape */
+      }
+    }
+
+    /* TARJETAS DE PRODUCTO */
+    .product-grid {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+
     .product-card {
       background: var(--card);
       border: 1px solid var(--border);
-      padding: 1rem;
       border-radius: 1rem;
+      padding: 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.5rem;
+      transition: transform 0.1s, border-color 0.2s;
     }
 
-    /* Modal */
+    .product-card:active { transform: scale(0.97); }
+
+    /* TICKETS Y CARRITO */
+    .cart-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: calc(var(--header-h) + 1rem);
+    }
+
+    .cart-items {
+      max-height: 40vh;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+
+    /* INPUTS AMIGABLES CON EL DEDO */
+    .input-touch {
+      background: #16161a;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 16px; /* Evita zoom en iOS */
+      width: 100%;
+      outline: none;
+    }
+
+    .btn-touch {
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-secondary { background: var(--border); color: #fff; }
+
+    /* INVENTARIO RESPONSIVE (TABLA A CARDS) */
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+      display: table;
+    }
+
+    .inventory-card-list { display: none; }
+
+    @media (max-width: 640px) {
+      .inventory-table { display: none; }
+      .inventory-card-list { 
+        display: grid; 
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .inv-mobile-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        padding: 1rem;
+      }
+    }
+
+    /* MODALES */
     .modal-overlay {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(4px);
-      z-index: 100;
-      display: grid;
-      place-items: center;
-      padding: 1rem;
-    }
-    .modal-content {
-      background: #111113;
-      border: 1px solid var(--border);
-      width: 100%;
-      max-width: 500px;
-      border-radius: 1.5rem;
-      padding: 1.5rem;
+      z-index: 1000;
+      display: flex;
+      align-items: flex-end; /* Mobile: sube desde abajo */
+      justify-content: center;
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      .grid-pos { grid-template-columns: 1fr; }
-      .hide-mobile { display: none; }
+    @media (min-width: 640px) {
+      .modal-overlay { align-items: center; }
     }
-    @media (min-width: 769px) {
-      .grid-pos { grid-template-columns: 1.2fr 0.8fr; }
+
+    .modal-content {
+      background: #111113;
+      width: 100%;
+      max-width: 500px;
+      border-radius: 1.5rem 1.5rem 0 0;
+      padding: 2rem 1.5rem;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @media (min-width: 640px) {
+      .modal-content { border-radius: 1.5rem; }
     }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
-  <!-- Scripts base (React) -->
+  <!-- Scripts -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -155,399 +215,221 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo } = React;
 
-    // --- CONFIGURACIÓN Y DATOS INICIALES ---
-    const DB_NAME = "tasastock_v4_data";
-    const DEFAULT_PRODUCTS = [
-      { codigo: "0001", nombre: "Arroz Mary 1kg", stock: 50, costo: 1.1, precio: 1.5, iva: 0, protegido: true, categoria: "exento" },
-      { codigo: "0002", nombre: "Harina PAN 1kg", stock: 100, costo: 1.2, precio: 1.8, iva: 0, protegido: true, categoria: "exento" },
-      { codigo: "0101", nombre: "Refresco 2L", stock: 24, costo: 1.0, precio: 2.0, iva: 16, protegido: false, categoria: "gravado" }
-    ];
-
     function App() {
-      // --- ESTADO ---
+      // ESTADO INICIAL
       const [productos, setProductos] = useState(() => {
-        const saved = localStorage.getItem(DB_NAME);
-        return saved ? JSON.parse(saved) : DEFAULT_PRODUCTS;
+        const saved = localStorage.getItem("pos_mobile_v1");
+        return saved ? JSON.parse(saved) : [
+          { codigo: "101", nombre: "Harina PAN", stock: 20, costo: 1.2, precio: 1.8, iva: 0 },
+          { codigo: "102", nombre: "Arroz 1kg", stock: 15, costo: 1.0, precio: 1.4, iva: 0 },
+          { codigo: "103", nombre: "Coca Cola 2L", stock: 10, costo: 1.5, precio: 2.5, iva: 16 }
+        ];
       });
-      const [view, setView] = useState('caja'); // caja, inventario, reportes
+
+      const [view, setView] = useState('caja');
       const [cart, setCart] = useState([]);
       const [search, setSearch] = useState('');
-      const [tasa, setTasa] = useState(65.5);
-      const [filter, setFilter] = useState('todos');
-      
-      // Estado para Calculadora de Cambio
-      const [pagoCliente, setPagoRecibido] = useState({ usd: '', bs: '' });
-      
-      // Estado para Modales
-      const [isModalOpen, setIsModalOpen] = useState(false);
-      const [editingProduct, setEditingProduct] = useState(null);
+      const [tasa, setTasa] = useState(65.00);
+      const [pagoCliente, setPagoCliente] = useState({ usd: '', bs: '' });
 
-      // --- PERSISTENCIA ---
+      // GUARDAR DATOS
       useEffect(() => {
-        localStorage.setItem(DB_NAME, JSON.stringify(productos));
+        localStorage.setItem("pos_mobile_v1", JSON.stringify(productos));
       }, [productos]);
 
-      // --- CALCULOS ---
-      const filteredProducts = useMemo(() => {
-        const s = search.toLowerCase();
-        return productos.filter(p => {
-          const matchSearch = p.nombre.toLowerCase().includes(s) || p.codigo.includes(s);
-          if (filter === 'exento') return matchSearch && p.iva === 0;
-          if (filter === 'gravado') return matchSearch && p.iva > 0;
-          return matchSearch;
-        });
-      }, [productos, search, filter]);
+      // FILTRADO
+      const filtered = useMemo(() => {
+        return productos.filter(p => 
+          p.nombre.toLowerCase().includes(search.toLowerCase()) || p.codigo.includes(search)
+        );
+      }, [productos, search]);
 
-      const cartTotals = useMemo(() => {
-        let subtotal = 0;
-        let ivaTotal = 0;
-        cart.forEach(item => {
-          const p = item.prod;
-          const lineTotal = p.precio * item.cantidad;
-          if (p.iva > 0) {
-            const base = lineTotal / (1 + (p.iva/100));
-            ivaTotal += lineTotal - base;
-          }
-          subtotal += lineTotal;
-        });
+      // TOTALES
+      const totals = useMemo(() => {
+        const totalUSD = cart.reduce((acc, item) => acc + (item.precio * item.qty), 0);
         return {
-          totalUSD: subtotal,
-          totalBS: subtotal * tasa,
-          ivaUSD: ivaTotal
+          usd: totalUSD,
+          bs: totalUSD * tasa
         };
       }, [cart, tasa]);
 
-      const cambio = useMemo(() => {
-        const pagadoUSD = parseFloat(pagoCliente.usd || 0);
-        const pagadoBS = parseFloat(pagoCliente.bs || 0);
-        const totalPagadoEnUSD = pagadoUSD + (pagadoBS / tasa);
-        const diff = totalPagadoEnUSD - cartTotals.totalUSD;
-        return {
-          usd: diff > 0 ? diff : 0,
-          bs: diff > 0 ? diff * tasa : 0
-        };
-      }, [pagoCliente, cartTotals, tasa]);
-
-      // --- ACCIONES ---
-      const addToCart = (prod) => {
-        if (prod.stock <= 0) return;
-        const exists = cart.find(c => c.codigo === prod.codigo);
+      // ACCIONES
+      const addToCart = (p) => {
+        if (p.stock <= 0) return;
+        const exists = cart.find(c => c.codigo === p.codigo);
         if (exists) {
-          if (exists.cantidad >= prod.stock) return;
-          setCart(cart.map(c => c.codigo === prod.codigo ? { ...c, cantidad: c.cantidad + 1 } : c));
+          if (exists.qty < p.stock) {
+            setCart(cart.map(c => c.codigo === p.codigo ? {...c, qty: c.qty + 1} : c));
+          }
         } else {
-          setCart([...cart, { codigo: prod.codigo, cantidad: 1, prod }]);
+          setCart([...cart, {...p, qty: 1}]);
         }
       };
 
-      const updateCartQty = (codigo, delta) => {
-        setCart(prev => prev.map(item => {
-          if (item.codigo === codigo) {
-            const newQty = item.cantidad + delta;
-            if (newQty > 0 && newQty <= item.prod.stock) return { ...item, cantidad: newQty };
-          }
-          return item;
-        }).filter(item => item.cantidad > 0));
-      };
-
-      const finalizarVenta = () => {
+      const processSale = () => {
         if (cart.length === 0) return;
-        // Restar stock
-        const newInventory = productos.map(p => {
-          const itemInCart = cart.find(c => c.codigo === p.codigo);
-          return itemInCart ? { ...p, stock: p.stock - itemInCart.cantidad } : p;
+        const newProducts = productos.map(p => {
+          const inCart = cart.find(c => c.codigo === p.codigo);
+          return inCart ? {...p, stock: p.stock - inCart.qty} : p;
         });
-        setProductos(newInventory);
+        setProductos(newProducts);
         setCart([]);
-        setPagoRecibido({ usd: '', bs: '' });
-        alert("¡Venta procesada con éxito!");
-      };
-
-      // Respaldos
-      const exportarDatos = () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(productos));
-        const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href", dataStr);
-        downloadAnchorNode.setAttribute("download", `respaldo_inventario_${new Date().toLocaleDateString()}.json`);
-        document.body.appendChild(downloadAnchorNode);
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-      };
-
-      const importarDatos = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          try {
-            const json = JSON.parse(evt.target.result);
-            if (Array.isArray(json)) {
-              setProductos(json);
-              alert("Inventario cargado correctamente");
-            }
-          } catch (err) { alert("Archivo inválido"); }
-        };
-        reader.readAsText(file);
+        setPagoCliente({usd: '', bs: ''});
+        alert("Venta procesada");
       };
 
       return (
-        <div className="flex flex-col min-h-screen">
-          <header className="flex items-center p-4">
-            <div className="mx-auto w-full max-w-7xl flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div style={{background:'#fff', color:'#000', padding:'6px 10px', borderRadius:'8px', fontWeight:'bold', fontSize:'12px'}}>POS</div>
-                <div className="hide-mobile">
-                  <div style={{fontSize:'14px', fontWeight:'bold', letterSpacing:'1px'}}>TASASTOCK PRO</div>
-                  <div style={{fontSize:'10px', color: 'var(--text-dim)'}}>SISTEMA DE CONTROL 2026</div>
-                </div>
-              </div>
-
-              <div className="flex bg-[#121214] p-1 rounded-full border">
-                <button onClick={() => setView('caja')} className={`btn ${view==='caja' ? 'btn-white' : 'btn-ghost'}`}>Caja</button>
-                <button onClick={() => setView('inventario')} className={`btn ${view==='inventario' ? 'btn-white' : 'btn-ghost'}`}>Inventario</button>
-              </div>
+        <div className="app-container">
+          <header>
+            <div className="flex items-center gap-2">
+              <div style={{background:'#fff', color:'#000', padding:'4px 8px', borderRadius:'6px', fontWeight:'700', fontSize:'12px'}}>PRO</div>
+              <span style={{fontWeight:'700', fontSize:'14px'}}>TasaStock</span>
+            </div>
+            
+            <div className="flex bg-[#16161a] rounded-full border p-1">
+              <button onClick={()=>setView('caja')} className={`btn-touch ${view==='caja'?'btn-primary':'btn-secondary'}`} style={{padding:'6px 12px', fontSize:'12px'}}>Caja</button>
+              <button onClick={()=>setView('inv')} className={`btn-touch ${view==='inv'?'btn-primary':'btn-secondary'}`} style={{padding:'6px 12px', fontSize:'12px'}}>Stock</button>
             </div>
           </header>
 
-          <main className="flex-1 p-4 mx-auto w-full max-w-7xl">
+          <main>
             {view === 'caja' ? (
-              <div className="grid grid-pos gap-6">
-                {/* LADO IZQUIERDO: PRODUCTOS */}
+              <div className="pos-grid">
+                {/* SECCIÓN PRODUCTOS */}
                 <div className="flex flex-col gap-4">
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="relative flex-1">
-                      <input 
-                        className="input-main" 
-                        placeholder="Buscar producto o código..." 
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => setFilter('todos')} className={`btn ${filter==='todos'?'btn-outline':'btn-ghost'}`}>Todos</button>
-                      <button onClick={() => setFilter('exento')} className={`btn ${filter==='exento'?'btn-outline':'btn-ghost'}`}>Cesta Básica</button>
-                    </div>
-                  </div>
+                  <input 
+                    className="input-touch" 
+                    placeholder="Buscar producto..." 
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {filteredProducts.map(p => (
-                      <div key={p.codigo} className={`product-card ${p.stock <= 0 ? 'opacity-40' : ''}`} onClick={() => addToCart(p)}>
+                  <div className="product-grid">
+                    {filtered.map(p => (
+                      <div key={p.codigo} className="product-card" onClick={() => addToCart(p)}>
                         <div className="flex justify-between items-start">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="mono" style={{fontSize:'11px', color:'var(--text-dim)'}}>{p.codigo}</span>
-                              {p.iva === 0 && <span className="badge badge-exento">Exento</span>}
-                            </div>
-                            <div style={{fontWeight:'600', marginTop:'4px'}}>{p.nombre}</div>
-                          </div>
-                          <div className="mono text-center">
-                            <div style={{fontSize:'10px', color:'var(--text-dim)'}}>Stock</div>
-                            <div style={{color: p.stock < 5 ? '#ef4444' : '#fff'}}>{p.stock}</div>
-                          </div>
+                          <span className="badge badge-exento" style={{fontSize:'9px'}}>{p.codigo}</span>
+                          <span className="mono" style={{fontSize:'12px', color: p.stock < 5 ? 'var(--danger)' : 'var(--success)'}}>
+                            {p.stock} pza
+                          </span>
                         </div>
-                        <div className="flex justify-between items-end mt-auto">
-                          <div>
-                            <div className="mono" style={{fontSize:'18px', fontWeight:'bold'}}>${p.precio.toFixed(2)}</div>
-                            <div className="mono" style={{fontSize:'11px', color:'var(--text-dim)'}}>Bs {(p.precio * tasa).toFixed(2)}</div>
-                          </div>
-                          <div className="btn btn-white" style={{padding:'8px'}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 5v14M5 12h14"/></svg></div>
+                        <div style={{fontWeight:'600', fontSize:'14px', height:'40px', overflow:'hidden'}}>{p.nombre}</div>
+                        <div className="mt-auto">
+                          <div className="mono" style={{fontWeight:'700', fontSize:'16px'}}>${p.precio.toFixed(2)}</div>
+                          <div className="mono" style={{fontSize:'10px', color:'var(--text-dim)'}}>Bs {(p.precio*tasa).toFixed(2)}</div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* LADO DERECHO: TICKET */}
-                <div className="flex flex-col gap-4">
-                  <div className="border rounded-xl p-4 bg-[#0e0e10] flex flex-col gap-4">
-                    <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-                      <span style={{fontWeight:'bold'}}>Resumen de Compra</span>
-                      <button onClick={() => setCart([])} className="btn-ghost" style={{fontSize:'11px', border:'none', background:'none'}}>Vaciar</button>
-                    </div>
+                {/* SECCIÓN CARRITO (Sticky en desktop) */}
+                <div className="cart-container">
+                  <div className="p-4 border-b border-zinc-800 flex justify-between">
+                    <span style={{fontWeight:'700'}}>Carrito ({cart.length})</span>
+                    <button onClick={()=>setCart([])} className="mono" style={{background:'none', border:'none', color:'var(--danger)', fontSize:'12px'}}>Vaciar</button>
+                  </div>
 
-                    <div className="flex flex-col gap-3 max-h-60 overflow-y-auto">
-                      {cart.map(item => (
-                        <div key={item.codigo} className="flex justify-between items-center">
+                  <div className="cart-items">
+                    {cart.length === 0 ? (
+                      <div className="text-center p-8 text-zinc-600">Carrito vacío</div>
+                    ) : (
+                      cart.map(item => (
+                        <div key={item.codigo} className="flex justify-between items-center mb-4">
                           <div style={{flex:1}}>
-                            <div style={{fontSize:'13px'}}>{item.prod.nombre}</div>
-                            <div className="mono" style={{fontSize:'11px', color:'var(--text-dim)'}}>${item.prod.precio.toFixed(2)} c/u</div>
+                            <div style={{fontSize:'13px', fontWeight:'500'}}>{item.nombre}</div>
+                            <div className="mono" style={{fontSize:'11px', color:'var(--text-dim)'}}>${item.precio.toFixed(2)} x {item.qty}</div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2 bg-zinc-900 rounded-lg p-1">
-                              <button onClick={(e) => {e.stopPropagation(); updateCartQty(item.codigo, -1)}} className="btn-ghost" style={{border:'none', background:'none', padding:'0 5px'}}>-</button>
-                              <span className="mono" style={{fontSize:'13px', width:'20px', textAlign:'center'}}>{item.cantidad}</span>
-                              <button onClick={(e) => {e.stopPropagation(); updateCartQty(item.codigo, 1)}} className="btn-ghost" style={{border:'none', background:'none', padding:'0 5px'}}>+</button>
-                            </div>
-                            <div className="mono" style={{width:'60px', textAlign:'right'}}>${(item.prod.precio * item.cantidad).toFixed(2)}</div>
-                          </div>
+                          <div className="mono" style={{fontWeight:'600'}}>${(item.precio*item.qty).toFixed(2)}</div>
                         </div>
-                      ))}
-                    </div>
+                      ))
+                    )}
+                  </div>
 
-                    <div className="border-t border-zinc-800 pt-3 space-y-2">
-                      <div className="flex justify-between text-zinc-400" style={{fontSize:'13px'}}>
-                        <span>IVA (16%)</span>
-                        <span className="mono">${cartTotals.ivaUSD.toFixed(2)}</span>
+                  <div className="p-4 bg-[#16161a] rounded-b-2xl border-t border-zinc-800">
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <div style={{fontSize:'12px', color:'var(--text-dim)'}}>Total a pagar</div>
+                        <div className="mono" style={{fontSize:'24px', fontWeight:'800'}}>${totals.usd.toFixed(2)}</div>
+                        <div className="mono" style={{fontSize:'14px', color:'var(--success)'}}>Bs {totals.bs.toFixed(2)}</div>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span style={{fontWeight:'bold', fontSize:'18px'}}>Total</span>
-                        <div className="text-right">
-                          <div className="mono" style={{fontSize:'22px', fontWeight:'bold'}}>${cartTotals.totalUSD.toFixed(2)}</div>
-                          <div className="mono" style={{color: 'var(--success)', fontSize:'14px'}}>Bs {cartTotals.totalBS.toFixed(2)}</div>
-                        </div>
+                      <div className="text-right">
+                        <label className="mono" style={{fontSize:'10px', display:'block'}}>Tasa BCV</label>
+                        <input 
+                          type="number" 
+                          inputMode="decimal"
+                          value={tasa} 
+                          onChange={e => setTasa(e.target.value)}
+                          style={{width:'70px', background:'none', border:`1px solid ${var(--border)}`, color:'#fff', textAlign:'center', borderRadius:'6px'}}
+                        />
                       </div>
-                    </div>
-
-                    {/* CALCULADORA DE CAMBIO */}
-                    <div className="bg-zinc-900/50 p-3 rounded-xl border border-dashed border-zinc-700">
-                      <div style={{fontSize:'11px', color:'var(--text-dim)', marginBottom:'8px', fontWeight:'bold'}}>CALCULADORA DE VUELTO</div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="mono" style={{fontSize:'10px'}}>Paga con $</label>
-                          <input 
-                            type="number" 
-                            className="input-main" 
-                            style={{padding:'5px 8px'}} 
-                            value={pagoCliente.usd}
-                            onChange={(e) => setPagoRecibido({...pagoCliente, usd: e.target.value})}
-                          />
-                        </div>
-                        <div>
-                          <label className="mono" style={{fontSize:'10px'}}>Paga con Bs</label>
-                          <input 
-                            type="number" 
-                            className="input-main" 
-                            style={{padding:'5px 8px'}} 
-                            value={pagoCliente.bs}
-                            onChange={(e) => setPagoRecibido({...pagoCliente, bs: e.target.value})}
-                          />
-                        </div>
-                      </div>
-                      {cambio.usd > 0 && (
-                        <div className="mt-3 p-2 bg-emerald-500/10 rounded-lg flex justify-between items-center">
-                          <span style={{fontSize:'12px', fontWeight:'bold'}}>CAMBIO:</span>
-                          <div className="text-right">
-                            <div className="mono" style={{fontSize:'14px', color:'#fff'}}>${cambio.usd.toFixed(2)}</div>
-                            <div className="mono" style={{fontSize:'11px', color: 'var(--success)'}}>Bs {cambio.bs.toFixed(2)}</div>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     <button 
-                      className="btn btn-white w-full" 
-                      style={{height:'50px', fontSize:'16px', justifyContent:'center'}}
+                      className="btn-touch btn-primary w-full" 
+                      style={{height:'56px'}}
                       disabled={cart.length === 0}
-                      onClick={finalizarVenta}
+                      onClick={processSale}
                     >
-                      Cobrar y Actualizar Stock
+                      Finalizar Venta
                     </button>
-                  </div>
-
-                  {/* CONFIG TASA */}
-                  <div className="p-4 border rounded-xl flex justify-between items-center bg-[#0e0e10]">
-                    <div className="flex items-center gap-2">
-                      <div style={{background:'var(--border)', padding:'8px', borderRadius:'50%'}}>💵</div>
-                      <div>
-                        <div style={{fontSize:'12px', color:'var(--text-dim)'}}>Tasa BCV</div>
-                        <div className="mono">1$ = {tasa} Bs</div>
-                      </div>
-                    </div>
-                    <input 
-                      type="number" 
-                      className="input-main" 
-                      style={{width:'80px', textAlign:'center', padding:'5px'}} 
-                      value={tasa} 
-                      onChange={(e) => setTasa(e.target.value)}
-                    />
                   </div>
                 </div>
               </div>
             ) : (
-              // --- VISTA INVENTARIO ---
-              <div className="space-y-6">
+              /* VISTA INVENTARIO RESPONSIVE */
+              <div className="flex flex-col gap-6">
                 <div className="flex justify-between items-center">
-                  <h2 style={{fontSize:'24px', fontWeight:'700'}}>Gestión de Inventario</h2>
-                  <div className="flex gap-2">
-                    <label className="btn btn-outline" style={{cursor:'pointer'}}>
-                      Importar JSON
-                      <input type="file" accept=".json" style={{display:'none'}} onChange={importarDatos} />
-                    </label>
-                    <button onClick={exportarDatos} className="btn btn-outline">Exportar</button>
-                    <button onClick={() => {setEditingProduct(null); setIsModalOpen(true)}} className="btn btn-white">+ Nuevo Producto</button>
-                  </div>
+                  <h2 style={{margin:0}}>Inventario</h2>
+                  <button className="btn-touch btn-primary" style={{padding:'8px 16px'}}>+ Nuevo</button>
                 </div>
 
-                <div className="border rounded-2xl overflow-hidden bg-[#0e0e10]">
-                  <table className="w-full mono" style={{fontSize:'13px', borderCollapse:'collapse'}}>
-                    <thead>
-                      <tr style={{background:'#121214', textAlign:'left', color:'var(--text-dim)'}}>
-                        <th className="p-4">CÓDIGO</th>
-                        <th className="p-4">NOMBRE</th>
-                        <th className="p-4">STOCK</th>
-                        <th className="p-4">COSTO</th>
-                        <th className="p-4">PRECIO</th>
-                        <th className="p-4">IVA</th>
-                        <th className="p-4 text-right">ACCIONES</th>
+                {/* Vista para Tablet/PC */}
+                <table className="inventory-table">
+                  <thead>
+                    <tr style={{textAlign:'left', color:'var(--text-dim)', fontSize:'12px'}}>
+                      <th className="p-4">COD</th>
+                      <th className="p-4">PRODUCTO</th>
+                      <th className="p-4">STOCK</th>
+                      <th className="p-4">PRECIO</th>
+                      <th className="p-4">ACCIONES</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productos.map(p => (
+                      <tr key={p.codigo} style={{borderBottom:'1px solid var(--border)'}}>
+                        <td className="p-4 mono">{p.codigo}</td>
+                        <td className="p-4 font-600">{p.nombre}</td>
+                        <td className="p-4 mono">{p.stock}</td>
+                        <td className="p-4 mono">${p.precio.toFixed(2)}</td>
+                        <td className="p-4"><button className="btn-touch btn-secondary" style={{padding:'5px 10px', fontSize:'11px'}}>Editar</button></td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-800">
-                      {productos.map(p => (
-                        <tr key={p.codigo} style={{borderTop:'1px solid var(--border)'}}>
-                          <td className="p-4">{p.codigo}</td>
-                          <td className="p-4" style={{fontWeight:'bold'}}>{p.nombre}</td>
-                          <td className="p-4" style={{color: p.stock < 10 ? '#ef4444' : '#34d399'}}>{p.stock}</td>
-                          <td className="p-4 text-zinc-500">${p.costo.toFixed(2)}</td>
-                          <td className="p-4">${p.precio.toFixed(2)}</td>
-                          <td className="p-4">{p.iva}%</td>
-                          <td className="p-4 text-right">
-                            <button 
-                              className="btn btn-ghost" 
-                              onClick={() => {setEditingProduct(p); setIsModalOpen(true)}}
-                            >Editar</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Vista para Móvil (Cards) */}
+                <div className="inventory-card-list">
+                  {productos.map(p => (
+                    <div key={p.codigo} className="inv-mobile-card">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="badge badge-exento">{p.codigo}</span>
+                        <button className="btn-touch btn-secondary" style={{padding:'4px 12px', fontSize:'11px'}}>Editar</button>
+                      </div>
+                      <div style={{fontWeight:'700', marginBottom:'8px'}}>{p.nombre}</div>
+                      <div className="flex justify-between text-zinc-400 mono" style={{fontSize:'13px'}}>
+                        <span>Stock: <b style={{color: p.stock < 5 ? 'var(--danger)' : '#fff'}}>{p.stock}</b></span>
+                        <span>Precio: <b style={{color:'#fff'}}>${p.precio.toFixed(2)}</b></span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
           </main>
 
-          {/* MODAL PARA PRODUCTO (NUEVO/EDITAR) */}
-          {isModalOpen && (
-            <div className="modal-overlay">
-              <div className="modal-content animate-in">
-                <h3 style={{marginBottom:'1rem'}}>{editingProduct ? 'Editar Producto' : 'Nuevo Producto'}</h3>
-                <div className="grid gap-4">
-                  <div className="grid grid-cols-2 gap-2">
-                    <input className="input-main" placeholder="Código" defaultValue={editingProduct?.codigo} />
-                    <select className="input-main" defaultValue={editingProduct?.iva}>
-                      <option value="0">IVA 0% (Exento)</option>
-                      <option value="16">IVA 16% (Gravado)</option>
-                    </select>
-                  </div>
-                  <input className="input-main" placeholder="Nombre del producto" defaultValue={editingProduct?.nombre} />
-                  <div className="grid grid-cols-3 gap-2">
-                    <input className="input-main" type="number" placeholder="Stock" defaultValue={editingProduct?.stock} />
-                    <input className="input-main" type="number" placeholder="Costo $" defaultValue={editingProduct?.costo} />
-                    <input className="input-main" type="number" placeholder="Precio $" defaultValue={editingProduct?.precio} />
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <button className="btn btn-outline w-full" onClick={() => setIsModalOpen(false)}>Cancelar</button>
-                    <button className="btn btn-white w-full" onClick={() => {
-                      // Aquí iría la lógica de guardado
-                      setIsModalOpen(false);
-                    }}>Guardar Cambios</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <footer className="p-6 text-center text-zinc-600 mono" style={{fontSize:'10px'}}>
-            TASASTOCK PRO 4.0 • SISTEMA POS OFFLINE-FIRST • DISEÑADO PARA VENEZUELA 2026
+          <footer style={{padding:'2rem', textAlign:'center', color:'var(--text-dim)', fontSize:'10px'}} className="mono">
+            TASASTOCK MOBILE PRO 2026 • FUNCIONA OFFLINE
           </footer>
         </div>
       );
