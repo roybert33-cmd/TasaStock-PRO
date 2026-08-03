@@ -1,17 +1,21 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TasaStock PRO 2026</title>
+  <title>TasaStock PRO - Cesta Básica</title>
 
-  <!-- React y Babel desde CDN confiable -->
+  <!-- PWA -->
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&family=Geist+Mono:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
     
     :root {
       --bg: #070708;
@@ -19,144 +23,95 @@
       --border: #27272a;
       --accent: #ffffff;
       --success: #10b981;
-      --danger: #ef4444;
       --text-dim: #71717a;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    
     body { 
       margin: 0; 
-      background-color: var(--bg); 
+      background: var(--bg); 
       color: #fafafa; 
       font-family: 'Geist', sans-serif;
-      overscroll-behavior-y: contain;
     }
 
     .mono { font-family: 'Geist Mono', monospace; }
 
-    /* Contenedor Principal */
-    .app-container {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
+    /* HEADER RESPONSIVE */
     header {
       position: sticky;
       top: 0;
-      z-index: 100;
-      background: rgba(7, 7, 8, 0.85);
+      z-index: 40;
+      background: rgba(7, 7, 8, 0.8);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      padding: 12px 16px;
+      padding: 10px 15px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    main {
-      flex: 1;
-      padding: 12px;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    /* Grilla responsiva */
-    .pos-layout {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: 1fr;
-    }
-
-    @media (min-width: 1024px) {
-      .pos-layout {
-        grid-template-columns: 1fr 380px;
-      }
-    }
-
-    /* Tarjetas de Producto */
+    /* GRID DE PRODUCTOS */
     .product-grid {
       display: grid;
       gap: 10px;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      grid-template-columns: repeat(2, 1fr); /* 2 columnas en movil */
     }
 
-    .product-card {
+    @media (min-width: 768px) {
+      .product-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+    }
+
+    /* LAYOUT CAJA */
+    .caja-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 1024px) {
+      .caja-layout { grid-template-columns: 1fr 380px; align-items: start; }
+      .sticky-cart { position: sticky; top: 84px; }
+    }
+
+    /* TARJETAS */
+    .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .product-card:active { transform: scale(0.96); background: #16161a; }
-
-    /* Carrito */
-    .cart-box {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      display: flex;
-      flex-direction: column;
-      max-height: 85vh;
-    }
-
-    .cart-items {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-    }
-
-    /* Botones y Formas */
-    .btn {
       border-radius: 12px;
       padding: 12px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
       gap: 8px;
-      font-size: 14px;
     }
-    .btn-primary { background: var(--accent); color: #000; }
-    .btn-secondary { background: var(--border); color: #fff; }
-    
+
     .input-touch {
       background: #121214;
       border: 1px solid var(--border);
       color: #fff;
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 16px; /* Evita zoom en iOS */
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 16px; /* Evita zoom molesto en iPhone */
       width: 100%;
       outline: none;
-      margin-bottom: 12px;
     }
 
-    /* Inventario Mobile */
-    .inv-card {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .btn-nav {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
     }
 
-    .badge {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: var(--border);
-      color: var(--text-dim);
-    }
+    .btn-active { background: #fff; color: #000; }
+    .btn-inactive { background: transparent; color: var(--text-dim); }
+
+    /* ESTILOS ELIX (NO TOCAR) */
+    #elix-activation-overlay{position:fixed;inset:0;z-index:999999;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+    .elix-card{background:#171717;border:1px solid #2a2a2a;border-radius:24px;padding:24px;width:100%;max-width:380px;margin-top:32px;}
+    .elix-input{width:100%;background:#0a0a0a;border:1.5px solid #333;border-radius:12px;padding:14px;color:#fff;font-size:18px;text-transform:uppercase;outline:none;text-align:center}
+    .elix-btn{width:100%;border:none;border-radius:14px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:12px}
   </style>
 </head>
 <body>
@@ -165,192 +120,164 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo } = React;
 
+    const PRODUCTOS_INICIALES = [
+      {codigo:"0001",nombre:"Arroz Mary 1kg",stock:200,costo:1.2,precio:1.6,iva:0,protegido:true},
+      {codigo:"0002",nombre:"Harina PAN 1kg",stock:100,costo:1.5,precio:1.9,iva:0,protegido:true},
+      {codigo:"0003",nombre:"Harina Doña María 1kg",stock:100,costo:1.4,precio:1.85,iva:0,protegido:true},
+      {codigo:"0011",nombre:"Huevos Cartón 30un",stock:100,costo:4.8,precio:6.5,iva:0,protegido:true},
+      {codigo:"0102",nombre:"Refresco Coca-Cola 2L",stock:50,costo:1.2,precio:1.8,iva:16,protegido:false}
+      // ... se pueden añadir los otros 30+ aquí
+    ];
+
     function App() {
-      // 1. Datos iniciales
       const [productos, setProductos] = useState(() => {
-        const saved = localStorage.getItem("pos_v4_store");
-        return saved ? JSON.parse(saved) : [
-          { codigo: "001", nombre: "Harina PAN", stock: 50, precio: 1.80, costo: 1.20 },
-          { codigo: "002", nombre: "Arroz Mary", stock: 30, precio: 1.45, costo: 0.90 },
-          { codigo: "003", nombre: "Aceite 1L", stock: 20, precio: 3.50, costo: 2.60 },
-          { codigo: "004", nombre: "Azúcar 1kg", stock: 15, precio: 1.20, costo: 0.85 },
-        ];
+        const saved = localStorage.getItem("pos_cesta_basica_2026_v3");
+        return saved ? JSON.parse(saved) : PRODUCTOS_INICIALES;
       });
 
+      const [tab, setTab] = useState('caja');
       const [cart, setCart] = useState([]);
-      const [view, setView] = useState('caja'); // caja o inventario
-      const [search, setSearch] = useState('');
-      const [tasa, setTasa] = useState(65.50);
+      const [busqueda, setBusqueda] = useState('');
+      const [tasa, setTasa] = useState(68.5);
 
-      // Guardar cambios
       useEffect(() => {
-        localStorage.setItem("pos_v4_store", JSON.stringify(productos));
+        localStorage.setItem("pos_cesta_basica_2026_v3", JSON.stringify(productos));
       }, [productos]);
 
-      // Filtrado de búsqueda
-      const filtered = productos.filter(p => 
-        p.nombre.toLowerCase().includes(search.toLowerCase()) || p.codigo.includes(search)
-      );
+      const formatCur = (n) => n.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-      // Totales
+      const filtered = useMemo(() => {
+        return productos.filter(p => 
+          p.nombre.toLowerCase().includes(busqueda.toLowerCase()) || p.codigo.includes(busqueda)
+        );
+      }, [productos, busqueda]);
+
       const totalUSD = cart.reduce((acc, item) => acc + (item.precio * item.qty), 0);
 
-      // Acciones de Carrito
-      const addToCart = (p) => {
-        if (p.stock <= 0) return;
-        const exists = cart.find(c => c.codigo === p.codigo);
-        if (exists) {
-          if (exists.qty < p.stock) {
-            setCart(cart.map(c => c.codigo === p.codigo ? {...c, qty: c.qty + 1} : c));
-          }
+      const addCart = (p) => {
+        if(p.stock <= 0) return;
+        const exist = cart.find(c => c.codigo === p.codigo);
+        if(exist) {
+          if(exist.qty < p.stock) setCart(cart.map(c => c.codigo === p.codigo ? {...c, qty: c.qty+1} : c));
         } else {
           setCart([...cart, {...p, qty: 1}]);
         }
       };
 
-      const updateQty = (codigo, delta) => {
-        setCart(prev => prev.map(item => {
-          if (item.codigo === codigo) {
-            const newQty = item.qty + delta;
-            return newQty > 0 && newQty <= item.stock ? {...item, qty: newQty} : item;
+      const changeQty = (cod, d) => {
+        setCart(cart.map(item => {
+          if(item.codigo === cod) {
+            const n = item.qty + d;
+            return (n > 0 && n <= item.stock) ? {...item, qty: n} : item;
           }
           return item;
-        }).filter(item => item.qty > 0));
+        }));
       };
 
-      const finalizarVenta = () => {
-        if (cart.length === 0) return;
-        const nuevosProds = productos.map(p => {
-          const enCart = cart.find(c => c.codigo === p.codigo);
-          return enCart ? { ...p, stock: p.stock - enCart.qty } : p;
+      const cobrar = () => {
+        if(cart.length === 0) return;
+        const res = productos.map(p => {
+          const c = cart.find(x => x.codigo === p.codigo);
+          return c ? {...p, stock: p.stock - c.qty} : p;
         });
-        setProductos(nuevosProds);
+        setProductos(res);
         setCart([]);
-        alert("Venta procesada con éxito");
+        alert("¡Cobro Exitoso!");
       };
 
       return (
-        <div className="app-container">
+        <div style={{minHeight:'100vh', display:'flex', flexDirection:'column'}}>
           <header>
-            <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
-              <div style={{background:'#fff', color:'#000', padding:'4px 8px', borderRadius:'6px', fontWeight:'700', fontSize:'14px'}}>PRO</div>
-              <span style={{fontWeight:'700'}}>TasaStock</span>
+            <div id="elix-logo-trigger" style={{display:'flex', alignItems:'center', gap:'10px'}}>
+              <div style={{background:'#fff', color:'#000', width:'32px', height:'32px', borderRadius:'8px', display:'grid', placeItems:'center', fontWeight:'800', fontSize:'12px'}}>POS</div>
+              <div className="hide-mobile">
+                <div style={{fontSize:'12px', fontWeight:'700', letterSpacing:'1px'}}>TasaStock PRO</div>
+                <div style={{fontSize:'9px', color: 'var(--text-dim)'}}>INVENTARIO • CAJA</div>
+              </div>
             </div>
-            <div style={{display:'flex', background:'#121214', borderRadius:'30px', padding:'4px', border:'1px solid var(--border)'}}>
-              <button onClick={()=>setView('caja')} className="btn" style={{padding:'6px 16px', background: view==='caja'?'#fff':'transparent', color: view==='caja'?'#000':'#71717a'}}>Caja</button>
-              <button onClick={()=>setView('inv')} className="btn" style={{padding:'6px 16px', background: view==='inv'?'#fff':'transparent', color: view==='inv'?'#000':'#71717a'}}>Stock</button>
+            
+            <div style={{display:'flex', background:'#121214', padding:'4px', borderRadius:'30px', border:'1px solid var(--border)'}}>
+              <button onClick={()=>setTab('caja')} className={`btn-nav ${tab==='caja'?'btn-active':'btn-inactive'}`}>Caja</button>
+              <button onClick={()=>setTab('inv')} className={`btn-nav ${tab==='inv'?'btn-active':'btn-inactive'}`}>Stock</button>
             </div>
           </header>
 
-          <main>
-            {view === 'caja' ? (
-              <div className="pos-layout">
-                {/* LADO PRODUCTOS */}
+          <main style={{flex:1, padding:'15px'}}>
+            {tab === 'caja' ? (
+              <div className="caja-layout">
                 <div>
-                  <input 
-                    className="input-touch" 
-                    placeholder="Buscar por nombre o código..." 
-                    value={search}
-                    onChange={(e)=>setSearch(e.target.value)}
-                  />
-                  
-                  <div className="product-grid">
+                  <input className="input-touch" placeholder="Buscar producto o código..." value={busqueda} onChange={e=>setBusqueda(e.target.value)} />
+                  <div className="product-grid" style={{marginTop:'15px'}}>
                     {filtered.map(p => (
-                      <div key={p.codigo} className="product-card" onClick={() => addToCart(p)}>
-                        <div style={{display:'flex', justifyContent:'between', width:'100%'}}>
-                          <span className="badge">{p.codigo}</span>
-                          <span style={{marginLeft:'auto', fontSize:'11px', color: p.stock < 5 ? 'var(--danger)':'var(--success)'}}>{p.stock} disp</span>
+                      <div key={p.codigo} className="card" onClick={() => addCart(p)}>
+                        <div style={{display:'flex', justifyContent:'space-between', fontSize:'11px'}}>
+                          <span className="badge mono">{p.codigo}</span>
+                          <span style={{color: p.stock < 5 ? 'var(--danger)' : 'var(--success)'}}>{p.stock} disp</span>
                         </div>
-                        <div style={{fontWeight:'600', fontSize:'14px', height:'34px', overflow:'hidden'}}>{p.nombre}</div>
+                        <div style={{fontSize:'14px', fontWeight:'600', height:'40px', overflow:'hidden'}}>{p.nombre}</div>
                         <div style={{marginTop:'auto'}}>
-                          <div className="mono" style={{fontSize:'18px', fontWeight:'700'}}>${p.precio.toFixed(2)}</div>
-                          <div className="mono" style={{fontSize:'10px', color:'var(--text-dim)'}}>Bs {(p.precio * tasa).toFixed(2)}</div>
+                          <div className="mono" style={{fontSize:'18px', fontWeight:'700'}}>${formatCur(p.precio)}</div>
+                          <div className="mono" style={{fontSize:'11px', color:'var(--text-dim)'}}>Bs {formatCur(p.precio * tasa)}</div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* LADO CARRITO */}
-                <div className="cart-box">
-                  <div style={{padding:'16px', borderBottom:'1px solid var(--border)', display:'flex', justifyContent:'space-between'}}>
-                    <span style={{fontWeight:'700'}}>Carrito ({cart.length})</span>
-                    <button onClick={()=>setCart([])} style={{background:'none', border:'none', color:'var(--danger)', fontSize:'12px'}}>Vaciar</button>
-                  </div>
-
-                  <div className="cart-items">
-                    {cart.length === 0 ? (
-                      <div style={{textAlign:'center', padding:'40px 0', color:'var(--text-dim)'}}>Carrito vacío</div>
-                    ) : (
-                      cart.map(item => (
-                        <div key={item.codigo} style={{display:'flex', justifyContent:'space-between', marginBottom:'16px', alignItems:'center'}}>
-                          <div style={{flex:1}}>
-                            <div style={{fontSize:'13px', fontWeight:'600'}}>{item.nombre}</div>
-                            <div className="mono" style={{fontSize:'11px', color:'var(--text-dim)'}}>${item.precio.toFixed(2)} x {item.qty}</div>
-                          </div>
-                          <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
-                            <div style={{display:'flex', alignItems:'center', gap:'8px', background:'#1c1c21', borderRadius:'8px', padding:'4px'}}>
-                              <button onClick={()=>updateQty(item.codigo, -1)} style={{width:'24px', height:'24px', border:'none', background:'none', color:'#fff'}}>–</button>
-                              <span className="mono" style={{fontSize:'12px'}}>{item.qty}</span>
-                              <button onClick={()=>updateQty(item.codigo, 1)} style={{width:'24px', height:'24px', border:'none', background:'none', color:'#fff'}}>+</button>
+                <div className="sticky-cart">
+                  <div className="card" style={{padding:'0', overflow:'hidden'}}>
+                    <div style={{padding:'15px', borderBottom:'1px solid var(--border)', fontWeight:'700'}}>Ticket de Venta</div>
+                    <div style={{maxHeight:'300px', overflowY:'auto', padding:'15px'}}>
+                      {cart.length === 0 ? <div style={{textAlign:'center', color: 'var(--text-dim)', padding:'20px'}}>Vacio</div> : 
+                        cart.map(item => (
+                          <div key={item.codigo} style={{display:'flex', justifyContent:'space-between', marginBottom:'12px'}}>
+                            <div style={{flex:1}}>
+                              <div style={{fontSize:'13px'}}>{item.nombre}</div>
+                              <div className="mono" style={{fontSize:'11px', color:'var(--text-dim)'}}>${formatCur(item.precio)} x {item.qty}</div>
                             </div>
-                            <div className="mono" style={{width:'50px', textAlign:'right', fontSize:'14px'}}>${(item.precio * item.qty).toFixed(2)}</div>
+                            <div style={{display:'flex', alignItems:'center', gap:'10px'}}>
+                               <button onClick={()=>changeQty(item.codigo, -1)} style={{width:'28px', height:'28px', borderRadius:'50%', border:'1px solid var(--border)', background:'none', color:'#fff'}}>-</button>
+                               <button onClick={()=>changeQty(item.codigo, 1)} style={{width:'28px', height:'28px', borderRadius:'50%', border:'1px solid var(--border)', background:'none', color:'#fff'}}>+</button>
+                            </div>
                           </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  <div style={{padding:'16px', background:'#121214', borderRadius:'0 0 18px 18px', borderTop:'1px solid var(--border)'}}>
-                    <div style={{display:'flex', justifyContent:'space-between', marginBottom:'12px'}}>
-                      <div>
-                        <div style={{fontSize:'12px', color:'var(--text-dim)'}}>Total a Pagar</div>
-                        <div className="mono" style={{fontSize:'28px', fontWeight:'700'}}>${totalUSD.toFixed(2)}</div>
-                        <div className="mono" style={{fontSize:'16px', color:'var(--success)'}}>Bs {(totalUSD * tasa).toFixed(2)}</div>
-                      </div>
-                      <div style={{textAlign:'right'}}>
-                        <span style={{fontSize:'10px', color:'var(--text-dim)', display:'block'}}>TASA BCV</span>
-                        <input 
-                          type="number" 
-                          value={tasa} 
-                          onChange={(e)=>setTasa(e.target.value)}
-                          style={{width:'70px', background:'transparent', border:'1px solid var(--border)', color:'#fff', textAlign:'center', borderRadius:'6px', padding:'4px', marginTop:'4px'}}
-                        />
-                      </div>
+                        ))
+                      }
                     </div>
-                    <button onClick={finalizarVenta} className="btn btn-primary" style={{width:'100%', height:'54px', fontSize:'16px'}} disabled={cart.length===0}>
-                      Finalizar Venta
-                    </button>
+                    <div style={{background:'#121214', padding:'15px', borderTop:'1px solid var(--border)'}}>
+                      <div style={{display:'flex', justifyContent:'space-between', marginBottom:'15px'}}>
+                        <span style={{color: 'var(--text-dim)'}}>Total USD</span>
+                        <span className="mono" style={{fontSize:'22px', fontWeight:'700'}}>${formatCur(totalUSD)}</span>
+                      </div>
+                      <div style={{display:'flex', justifyContent:'space-between', marginBottom:'15px', color:'var(--success)'}}>
+                        <span>Total BS</span>
+                        <span className="mono">Bs {formatCur(totalUSD * tasa)}</span>
+                      </div>
+                      <button onClick={cobrar} className="btn-nav btn-active" style={{width:'100%', height:'50px', fontSize:'16px'}}>Finalizar Cobro</button>
+                    </div>
                   </div>
                 </div>
               </div>
             ) : (
-              /* VISTA INVENTARIO */
-              <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
-                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'10px'}}>
-                  <h2 style={{margin:0, fontSize:'20px'}}>Inventario</h2>
-                  <button className="btn btn-primary" style={{padding:'8px 16px'}}>+ Nuevo</button>
-                </div>
-                <div style={{borderRadius:'16px', overflow:'hidden', border:'1px solid var(--border)'}}>
-                  {productos.map(p => (
-                    <div key={p.codigo} className="inv-card">
-                      <div>
-                        <div style={{fontWeight:'600'}}>{p.nombre}</div>
-                        <div className="mono" style={{fontSize:'12px', color:'var(--text-dim)'}}>COD: {p.codigo} • Costo: ${p.costo.toFixed(2)}</div>
-                      </div>
-                      <div style={{textAlign:'right'}}>
-                        <div className="mono" style={{fontSize:'14px'}}>${p.precio.toFixed(2)}</div>
-                        <div className="mono" style={{fontSize:'12px', color: p.stock < 10 ? 'var(--danger)':'#fff'}}>Stock: {p.stock}</div>
-                      </div>
+              <div className="card">
+                <div style={{padding:'10px', fontWeight:'700', fontSize:'18px'}}>Inventario</div>
+                {productos.map(p => (
+                  <div key={p.codigo} style={{padding:'12px', borderBottom:'1px solid var(--border)', display:'flex', justifyContent:'space-between'}}>
+                    <div>
+                      <div style={{fontSize:'14px', fontWeight:'600'}}>{p.nombre} {p.protegido && '🛡️'}</div>
+                      <div className="mono" style={{fontSize:'12px', color:'var(--text-dim)'}}>{p.codigo} • Costo: ${p.costo}</div>
                     </div>
-                  ))}
-                </div>
+                    <div style={{textAlign:'right'}}>
+                      <div className="mono" style={{fontSize:'14px'}}>${formatCur(p.precio)}</div>
+                      <div className="mono" style={{fontSize:'12px'}}>Stock: {p.stock}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </main>
-
-          <footer style={{padding:'20px', textAlign:'center', fontSize:'10px', color:'var(--text-dim)'}} className="mono">
-            TASASTOCK PRO V4 • 2026 • RESPALDO LOCAL ACTIVO
+          
+          <footer style={{textAlign:'center', padding:'20px', color: 'var(--text-dim)', fontSize:'10px'}} className="mono">
+            POS CESTA BÁSICA 2026 • KEY: pos_cesta_basica_2026_v3
           </footer>
         </div>
       );
@@ -358,6 +285,73 @@
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
+  </script>
+
+  <script>
+  // INICIO SISTEMA ELIX-0603 - RESTAURADO COMPLETAMENTE
+  (function(){
+    const FORMULA = (base) => {
+      base = (base || '').toUpperCase().replace(/[^A-Z]/g,'').slice(0,4).padEnd(4,'X');
+      let sum = 0; for(let c of base) sum += c.charCodeAt(0);
+      let code = (sum * 37 + 9281) % 10000;
+      return base + '-' + String(code).padStart(4,'0');
+    };
+    const VALIDAR = (licencia) => {
+      if(!/^[A-Z]{4}-\d{4}$/.test(licencia)) return false;
+      let [base, num] = licencia.split('-');
+      return FORMULA(base) === licencia;
+    };
+
+    function crearOverlay(){
+      if(document.getElementById('elix-activation-overlay')) return;
+      const div = document.createElement('div');
+      div.id = 'elix-activation-overlay';
+      div.innerHTML = `
+        <div style="background:#fff; width:60px; height:60px; border-radius:15px; margin-bottom:20px;"></div>
+        <div style="color:#fff; font-size:24px; font-weight:800;">TasaStock PRO</div>
+        <div class="elix-card">
+          <div style="color:#fff; margin-bottom:15px; text-align:center">Activación Requerida</div>
+          <input id="elix-lic-input" class="elix-input" placeholder="XXXX-0000" maxlength="9">
+          <button id="elix-activar" class="elix-btn" style="background:#fff; color:#000">Activar Licencia</button>
+        </div>
+      `;
+      document.body.appendChild(div);
+      document.getElementById('elix-activar').onclick = () => {
+        let val = document.getElementById('elix-lic-input').value.toUpperCase().trim();
+        if(VALIDAR(val)){
+          localStorage.setItem('elix_license', val);
+          div.remove();
+        } else {
+          alert('Código de licencia inválido.');
+        }
+      };
+    }
+
+    // Lógica de 5 toques para el Panel del Dueño
+    let toques = 0; let timer = null;
+    function handleLogoClick(){
+      toques++;
+      if(timer) clearTimeout(timer);
+      timer = setTimeout(()=> toques = 0, 3000);
+      if(toques >= 5){
+        toques = 0;
+        let p = prompt("PASSWORD DUEÑO:");
+        if(p === "0603") {
+            let base = prompt("NOMBRE BASE (4 letras):", "BODE");
+            alert("CÓDIGO GENERADO: " + FORMULA(base));
+        }
+      }
+    }
+
+    function init(){
+      const lic = localStorage.getItem('elix_license');
+      if(!lic || !VALIDAR(lic)) crearOverlay();
+      document.addEventListener('click', (e)=>{
+        if(e.target.closest('#elix-logo-trigger')) handleLogoClick();
+      });
+    }
+    init();
+  })();
   </script>
 </body>
 </html>
